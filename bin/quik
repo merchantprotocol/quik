@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 /**
  * NOTICE OF LICENSE
@@ -30,25 +31,35 @@
  * @copyright  Copyright (c) 2019 Merchant Protocol, LLC (https://merchantprotocol.com/)
  * @license    MIT License
  */
-namespace Quik;
 
-class Clear
-{
-    protected $_shell = NULL;
-    
-    /**
-     * 
-     */
-    public function __construct()
-    {
-        $this->_shell = new \Quik\Shell;
-    }
-  
-    /**
-     * @see https://devdocs.magento.com/guides/v2.3/howdoi/php/php_clear-dirs.html
-     */
-    public function dirs()
-    {
-        return $this->_shell->execute('rm -rf var/page_cache var/cache var/composer_home generated/code generated/metadata var/view_preprocessed');
+$autoload = [
+    getcwd() . '/vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+    __DIR__ . '/../vendor/autoload.php'
+];
+
+$webroot = false;
+$loaded = false;
+$vendorDir = false;
+for ($i = 0; $i < count($autoload); $i++) {
+    if (file_exists($autoload[$i])) {
+        require $autoload[$i];
+        $vendorDir = dirname($autoload[$i]);
+        $loaded = true;
+        $webroot = dirname($vendorDir);
+        break;
     }
 }
+if (!$loaded) {
+    fwrite(
+        STDERR,
+        'Unable to determine install location. Please review our documentation @ https://app.gitbook.com/@merchant-protocol/s/merchantprotocol-quik/' . PHP_EOL
+    );
+    exit(1);
+}
+
+// Setup include path
+//set_include_path($includePath . PATH_SEPARATOR . get_include_path());
+
+new \Quik\Application($webroot, new \Quik\Parameters());
+
