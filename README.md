@@ -1,8 +1,8 @@
 Quik Magento 2 Management by Merchant Protocol
 --
-To bring enjoyment back to the Magento command line, so that you'll like it again. Because having to remember long commands sucks.
+Quik is designed to shorthand typical Magento operations so that you don't have to remember everything. To bring enjoyment back to the Magento command line, so that you'll like it again. Because having to remember long commands sucks. 
 
-Quik is designed to shorthand typical Magento operations so that you don't have to remember everything.
+Designed by <a title='Magento Developers' href='https://merchantprotocol.com/'>Merchant Protocol Magento Developers</a>
 
 * * *
 ![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)
@@ -22,3 +22,6 @@ We have packaged this script to work with composer. Run the following command wh
 
 > composer require merchantprotocol/quik
 
+### Review our Documentation
+
+[Quik Magento 2 Command Documentation](https://app.gitbook.com/@merchant-protocol/s/merchantprotocol-quik/)
