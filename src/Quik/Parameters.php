@@ -81,6 +81,8 @@ class Parameters
                     $this->_args[] = $arg;
                 }
             }
+        } else {
+            $this->_help = true;
         }
     }
     
