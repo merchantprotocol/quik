@@ -47,10 +47,16 @@ class Application
     protected $_webroot = null;
     
     /**
-     * 
-     * @var unknown
+     * The class object of the command to run
+     * @var \Quik\CommandAbstract
      */
     protected $_command = null;
+    
+    /**
+     * The class name of the command to run
+     * @var string
+     */
+    protected $_commandClass = null;
     
     /**
      * @see https://devdocs.magento.com/guides/v2.3/howdoi/php/php_clear-dirs.html
@@ -59,12 +65,36 @@ class Application
     {
         $this->_webroot = $webroot;
         $this->_parameters = $parameters;
-        
-        if ($this->_parameters->getHelp()) {
+        $this->_commandClass = $this->getParameters()->getCommand();
+        if (!$this->_commandClass) {
+            $this->showError();
             $this->showUsage();
             exit(0);
         }
+        
+        // Display help for command or more
+        if ($this->_parameters->getHelp()) {
+            if (is_callable(array($this->getCommand(), 'showUsage'))) {
+                $this->getCommand()->showUsage();
+            } else {
+                $this->showUsage();
+            }
+            exit(0);
+        }
         $this->run( $this->getParameters()->getCommand() );
+    }
+    
+    /**
+     *
+     * @return \Quik\CommandAbstract
+     */
+    public function getCommand()
+    {
+        if (is_null($this->_command)) {
+            $classname = '\Quik\Commands\\'.$this->_commandClass;
+            $this->_command = new $classname($this);
+        }
+        return $this->_command;
     }
     
     /**
@@ -76,6 +106,24 @@ class Application
         $classname = '\Quik\Commands\\'.$command;
         $this->_command = new $classname($this);
         $this->_command->execute();
+    }
+    
+    /**
+     *
+     * @return string
+     */
+    public function getWebrootDir()
+    {
+        return $this->_webroot;
+    }
+    
+    /**
+     *
+     * @return \Quik\Parameters
+     */
+    public function getParameters()
+    {
+        return $this->_parameters;
     }
     
     /**
@@ -106,7 +154,7 @@ class Application
         echo 'Options:'.PHP_EOL;
         echo '  -h, --help      Show this message'.PHP_EOL;
         echo '  -q, --quiet     Causes quik to return no output'.PHP_EOL;
-        echo '  -v, --verbose   Display the verbose of every command'.PHP_EOL;
+        //         echo '  -v, --verbose   Display the verbose of every command'.PHP_EOL;
         echo '  -y              Automatically confirm all prompts'.PHP_EOL;
         echo PHP_EOL;
         echo PHP_EOL;
@@ -114,29 +162,14 @@ class Application
     }
     
     /**
+     * Display the help information
      *
-     * @return string
      */
-    public function getWebrootDir()
+    public function showError()
     {
-        return $this->_webroot;
-    }
-    
-    /**
-     *
-     * @return \Quik\Parameters
-     */
-    public function getParameters()
-    {
-        return $this->_parameters;
-    }
-    
-    /**
-     *
-     * @return \Quik\CommandAbstract
-     */
-    public function getCommand()
-    {
-        return $this->_command;
+        echo PHP_EOL;
+        echo PHP_EOL;
+        echo \Quik\CommandAbstract::RED.'The command you entered does not exist. @see quik --help.'.\Quik\CommandAbstract::NC.PHP_EOL;
+        echo PHP_EOL;
     }
 }
