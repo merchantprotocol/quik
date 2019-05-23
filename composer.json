@@ -1,19 +1,18 @@
 {
-    "name": "merchantprotocol/quik",
-    "description": "Quik is designed to shorthand typical Magento operations so that you don't have to remember everything.",
-    "type": "project",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Jack",
-            "email": "jonathon@merchantprotocol.com"
-        }
-    ],
-    "minimum-stability": "dev",
-    "require": {},
-    "autoload": {
-        "psr-0": {
-            "Quik": "src/"
-        }
-    }
+	"name" : "merchantprotocol/quik",
+	"description" : "Quik is designed to shorthand typical Magento operations so that you don't have to remember everything.",
+	"homepage": "https://merchantprotocol.com/",
+	"type" : "project",
+	"license" : "MIT",
+	"authors" : [{
+			"name" : "Jack",
+			"email" : "jonathon@merchantprotocol.com"
+		}
+	],
+	"minimum-stability" : "dev",
+	"autoload" : {
+		"psr-0" : {
+			"Quik" : "src/"
+		}
+	}
 }
