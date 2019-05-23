@@ -40,6 +40,7 @@ class Parameters
     protected $_help = false;
     
     protected $_cert_csr = false;
+    protected $__maintenance_off = false;
     
     protected $_command = false;
     protected $_commands = [];
@@ -79,6 +80,8 @@ class Parameters
                 } elseif ($arg == '-v' || $arg == '--verbose') {
                     $this->_verbose = true;
                     
+                } elseif ($arg == '-o' || $arg == '--off') {
+                    $this->__maintenance_off = true;
                 } elseif ($arg == '--csr') {
                     $this->_cert_csr = true;
                     

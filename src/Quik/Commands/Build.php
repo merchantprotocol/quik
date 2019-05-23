@@ -35,7 +35,7 @@ namespace Quik\Commands;
 class Build extends \Quik\CommandAbstract
 {
     /**
-     * @see https://devdocs.magento.com/guides/v2.3/howdoi/php/php_clear-dirs.html
+     * Build Magento
      */
     public function execute()
     {

@@ -53,6 +53,17 @@ class User
     }
     
     /**
+     * Return the current users IP
+     * 
+     * @return string
+     */
+    public function getIp()
+    {
+        $response = $this->_shell->execute('dig +short myip.opendns.com @resolver1.opendns.com');
+        return $response->output;
+    }
+    
+    /**
      *
      * @return string|boolean
      */

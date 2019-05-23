@@ -48,7 +48,7 @@ class Apache
      *
      * @var string
      */
-    CONST GETUSER = "ps -axo user:19,comm | egrep '(httpd|apache2|apache)' | grep -v `whoami` | grep -v root | head -n1 | awk '{print $1}'";
+    CONST GETUSER = "ps -axo user:19,comm | egrep '(httpd|apache2|apache|nginx)' | grep -v `whoami` | grep -v root | head -n1 | awk '{print $1}'";
     
     /**
      * Add the username and this will return the groups of that user.
