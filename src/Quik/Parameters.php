@@ -34,6 +34,8 @@ namespace Quik;
 
 class Parameters
 {
+    protected $_count = 0;
+    
     protected $_quiet = false;
     protected $_yes = false;
     protected $_verbose = false;
@@ -41,6 +43,9 @@ class Parameters
     
     protected $_cert_csr = false;
     protected $__maintenance_off = false;
+    protected $__development_m = false;
+    protected $__development_g = false;
+    protected $__development_t = false;
     
     protected $_command = false;
     protected $_commands = [];
@@ -61,9 +66,10 @@ class Parameters
             $options =  $_SERVER['argv'];
         }
         
+        $this->_count = $count - $start;
         $commands = $this->getAvailableCommands();
         
-        if ($count > $start) {
+        if ($count > 0) {
             for ($i = $start; $i < $count; $i++) {
                 $arg = $options[$i];
                 
@@ -80,6 +86,12 @@ class Parameters
                 } elseif ($arg == '-v' || $arg == '--verbose') {
                     $this->_verbose = true;
                     
+                } elseif ($arg == '-m' || $arg == '--mode') {
+                    $this->__development_m = true;
+                } elseif ($arg == '-g' || $arg == '--gitignore') {
+                    $this->__development_g = true;
+                } elseif ($arg == '-t' || $arg == '--tail') {
+                    $this->__development_t = true;
                 } elseif ($arg == '-o' || $arg == '--off') {
                     $this->__maintenance_off = true;
                 } elseif ($arg == '--csr') {
@@ -124,6 +136,16 @@ class Parameters
     public function getHelp()
     {
         return $this->_help;
+    }
+    
+    /**
+     * Return the number of parameters, including commands
+     * 
+     * @return boolean
+     */
+    public function getCount()
+    {
+        return $this->_count;
     }
     
     /**

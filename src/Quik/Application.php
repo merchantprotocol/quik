@@ -119,6 +119,33 @@ class Application
     
     /**
      *
+     * @return string
+     */
+    public function getQuikRootDir()
+    {
+        return $this->_webroot.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'merchantprotocol'.DIRECTORY_SEPARATOR.'quik';
+    }
+    
+    /**
+     *
+     * @return string
+     */
+    public function getQuikDir()
+    {
+        return $this->getQuikRootDir().DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR.'Quik';
+    }
+    
+    /**
+     * .git dir
+     * @return string
+     */
+    public function getGitDir()
+    {
+        return $this->getWebrootDir().DIRECTORY_SEPARATOR.'.git';
+    }
+    
+    /**
+     *
      * @return \Quik\Parameters
      */
     public function getParameters()
