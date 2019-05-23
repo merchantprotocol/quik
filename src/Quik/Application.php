@@ -35,6 +35,13 @@ namespace Quik;
 class Application
 {
     /**
+     * Current version of this library
+     * 
+     * @var string
+     */
+    CONST VERSION = '0.0.3';
+    
+    /**
      *
      * @var \Quik\Parameters
      */
@@ -66,19 +73,25 @@ class Application
         $this->_webroot = $webroot;
         $this->_parameters = $parameters;
         $this->_commandClass = $this->getParameters()->getCommand();
-        if (!$this->_commandClass) {
-            $this->showError();
-            $this->showUsage();
+        
+        // display version
+        if ($this->_parameters->getVersion()) {
+            echo 'Quik Version '.SELF::VERSION.' by Merchant Protocol'.PHP_EOL;
             exit(0);
         }
-        
         // Display help for command or more
         if ($this->_parameters->getHelp()) {
-            if (is_callable(array($this->getCommand(), 'showUsage'))) {
+            if ($this->_commandClass && is_callable(array($this->getCommand(), 'showUsage'))) {
                 $this->getCommand()->showUsage();
             } else {
                 $this->showUsage();
             }
+            exit(0);
+        }
+        // No command error
+        if (!$this->_commandClass) {
+            $this->showError();
+            $this->showUsage();
             exit(0);
         }
         $this->run( $this->getParameters()->getCommand() );

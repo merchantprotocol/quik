@@ -40,6 +40,7 @@ class Parameters
     protected $_yes = false;
     protected $_verbose = false;
     protected $_help = false;
+    protected $_version = false;
     
     protected $_cert_csr = false;
     protected $__maintenance_off = false;
@@ -79,6 +80,8 @@ class Parameters
                 
                 if ($arg == '-h' || $arg == '--help') {
                     $this->_help = true;
+                } elseif ($arg == '-v' || $arg == '--version') {
+                    $this->_version = true;
                 } elseif ($arg == '-y') {
                     $this->_yes = true;
                 } elseif ($arg == '-q' || $arg == '--quiet') {
@@ -136,6 +139,15 @@ class Parameters
     public function getHelp()
     {
         return $this->_help;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getVersion()
+    {
+        return $this->_version;
     }
     
     /**
