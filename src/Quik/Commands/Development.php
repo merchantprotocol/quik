@@ -77,7 +77,7 @@ class Development extends \Quik\CommandAbstract
     {
         if (file_exists(dirname($this->getExcludePath()))) {
             $this->echo('Installing local gitignore file at '.$this->getExcludePath());
-            file_put_contents($this->getExcludePath(), $this->getGitSource());
+            file_put_contents($this->getExcludePath(), $this->getGitSource(), FILE_APPEND);
             // test
             $source = file_get_contents($this->getExcludePath());
             if (!strlen($source)) {

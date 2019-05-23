@@ -35,13 +35,55 @@ namespace Quik\Commands;
 class Changelog extends \Quik\CommandAbstract
 {
     /**
+     * 
+     * @var string
+     */
+    CONST CHANGLOG_FILENAME = 'CHANGELOG.md';
+    
+    /**
      * Build Magento
      */
     public function execute()
     {
+        // Check that the working directory is clean
         $this->_shell->execute("cd ".$this->_app->getWebrootDir());
         $status = $this->_shell->execute("git status");
+        if (strpos($status->output, 'nothing to commit, working tree clean') === false) {
+            if (!$this->confirm("Your working directory has unresolved changes. Do you want to continue?")) {
+                $this->echo('Aborting...', SELF::RED);
+                exit(0);
+            }
+        }
         
+        $filename = $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.SELF::CHANGLOG_FILENAME;
+        
+        // building the changlog text
+        $changlog = 'DEVELOPMENT'.PHP_EOL.'============='.PHP_EOL;
+        $changlog .= $this->getFormattedCommits();
+        $changlog .= file_get_contents($filename);
+        
+        // update the changelog
+        file_put_contents( $filename, $changlog );
+        $this->echo('Changlog has been updated!', SELF::GREEN);
+    }
+    
+    /**
+     * 
+     * @return \Quik\Commands\unknown
+     */
+    public function getFormattedCommits()
+    {
+        $logRaw = $this->_getCommitHistory();
+        $logArray = $this->_parseLog($logRaw);
+        return $this->_formatLog($logArray);
+    }
+    
+    /**
+     * 
+     * @return string
+     */
+    protected function _getCommitHistory()
+    {
         // get tag information
         $this->_shell->execute("git fetch --tags");
         $tagsString = $this->_shell->execute("git tag --list");
@@ -55,20 +97,63 @@ class Changelog extends \Quik\CommandAbstract
         } else {
             $logString = $this->_shell->execute("git log --no-merges --full-history");
         }
-        
-        // format the log
-        $keywords = preg_split("/[\s,]+/", "hypertext language, programming");
-        
-        
-        
-        var_dump($logString->output);
+        return $logString->output;
     }
     
-    public function gitLog()
+    /**
+     * Parse the git log history into an array
+     * 
+     * @param string $logString
+     * @return array
+     */
+    protected function _parseLog( $logString )
     {
-        
-        $response = $this->_shell->execute("git log");
-        var_dump($response->output);
+        $history = array();
+        $logString .= PHP_EOL.'commit'; // A little hack to get the last message
+        foreach(explode(PHP_EOL, $logString) as $line) {
+            if(strpos($line, 'commit')===0) {
+                if(!empty($commit)){
+                    // do some last minute formatting
+                    $commit['message'] = trim($commit['message']);
+                    
+                    $hashtags = [];
+                    preg_match_all("/#([\p{Pc}\p{N}\p{L}\p{Mn}-]+)/", $commit['message'], $matches);
+                    if ($matches) {
+                        $hashtagsArray = array_count_values($matches[0]);
+                        $hashtags = array_keys($hashtagsArray);
+                    }
+                    $commit['issues'] = $hashtags;
+                    
+                    array_push($history, $commit);
+                    $commit = [];
+                }
+                $commit['hash']   = trim(substr($line, strlen('commit')));
+            }
+            else if(strpos($line, 'Author')===0){
+                $commit['author'] = trim(substr($line, strlen('Author:')));
+            }
+            else if(strpos($line, 'Date')===0){
+                $commit['date']   = trim(substr($line, strlen('Date:')));
+            }
+            else{
+                $commit['message']  .= $line;
+            }
+        }
+        return $history;
+    }
+    
+    /**
+     *
+     * @param unknown $logArray
+     * @return unknown
+     */
+    protected function _formatLog( $logArray )
+    {
+        $log = '* Commits:'.PHP_EOL;
+        foreach ($logArray as $commit) {
+            $log .= '    * '.$commit['message'].PHP_EOL;
+        }
+        return $log.PHP_EOL;
     }
     
     /**
@@ -80,7 +165,6 @@ class Changelog extends \Quik\CommandAbstract
         echo PHP_EOL;
         echo 'Options:'.PHP_EOL;
         echo '  -h, --help          Show this message'.PHP_EOL;
-        echo '  -, --          Place this project into developer mode.'.PHP_EOL;
         echo PHP_EOL;
     }
 }
