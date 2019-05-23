@@ -59,7 +59,9 @@ class Permissions extends \Quik\CommandAbstract
         $response = $this->_shell->execute('find var generated vendor pub/static pub/media app/etc -type d -exec chmod g+ws {} +');
         
         $this->echo('Updating specific files', SELF::GREEN);
-        $response = $this->_shell->execute('chmod 644 ./app/etc/*.xml');
+        $response = $this->_shell->execute('mkdir pub/static');
+        $response = $this->_shell->execute('chmod 775 pub/static');
+        $response = $this->_shell->execute('chmod 664 ./app/etc/*.xml');
         $response = $this->_shell->execute('chmod u+x bin/magento');
         $response = $this->_shell->execute('chmod u+x vendor/bin/quik');
 

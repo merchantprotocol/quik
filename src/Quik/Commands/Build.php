@@ -60,6 +60,8 @@ class Build extends \Quik\CommandAbstract
         $this->run("clear -y");
         $response = $this->_shell->execute($this->getBinMagento().' app:config:import');
         $this->echo($response->output);
+        $response = $this->_shell->execute($this->getBinMagento().' setup:upgrade');
+        $this->echo($response->output);
         $response = $this->_shell->execute($this->getBinMagento().' setup:di:compile');
         $this->echo($response->output);
         $response = $this->_shell->execute($this->getBinMagento().' setup:static-content:deploy');
