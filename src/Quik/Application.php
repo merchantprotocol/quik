@@ -39,7 +39,7 @@ class Application
      * 
      * @var string
      */
-    CONST VERSION = '0.0.3';
+    CONST VERSION = '0.0.4';
     
     /**
      *
