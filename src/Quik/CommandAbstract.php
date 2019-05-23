@@ -143,6 +143,15 @@ class CommandAbstract
     }
     
     /**
+     *
+     * @return boolean
+     */
+    public function getParameters()
+    {
+        return $this->_app->getParameters();
+    }
+    
+    /**
      * 
      * @return boolean
      */

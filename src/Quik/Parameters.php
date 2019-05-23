@@ -38,6 +38,9 @@ class Parameters
     protected $_yes = false;
     protected $_verbose = false;
     protected $_help = false;
+    
+    protected $_cert_csr = false;
+    
     protected $_command = false;
     protected $_commands = [];
     protected $_args = [];
@@ -75,6 +78,10 @@ class Parameters
                     $this->_quiet = true;
                 } elseif ($arg == '-v' || $arg == '--verbose') {
                     $this->_verbose = true;
+                    
+                } elseif ($arg == '--csr') {
+                    $this->_cert_csr = true;
+                    
                 } elseif (!$this->_command && $command = $this->in_array_r($arg, $commands)) {
                     $this->_command = $command;
                 } else {
@@ -132,6 +139,16 @@ class Parameters
     public function getVerbose()
     {
         return $this->_verbose;
+    }
+    
+    /**
+     * Used to gain access to the protected variable values
+     * 
+     * @return unknown
+     */
+    public function get( $method )
+    {
+        return $this->$method;
     }
     
     /**

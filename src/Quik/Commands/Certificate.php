@@ -63,13 +63,11 @@ class Certificate extends \Quik\CommandAbstract
             exit(0);
         }
         
-        $params = [
-            "/etc/ssl/private/{$this->getFqdn()}.key",
-            "/etc/ssl/certs/{$this->getFqdn()}.crt"
-            ];
+        $keypath = "/etc/ssl/private/{$this->getFqdn()}.key";
         
+        // Gather user data
         $this->echo('Generating a RSA private key'.PHP_EOL.'....................................+++++');
-        $this->echo("writing new private key to {$params[0]}".PHP_EOL.'-----');
+        $this->echo("writing new private key to $keypath".PHP_EOL.'-----');
         $this->echo('You are about to be asked to enter information that will be incorporated'.PHP_EOL
         .'into your certificate request.'.PHP_EOL
         .'What you are about to enter is what is called a Distinguished Name or a DN.'.PHP_EOL
@@ -77,40 +75,55 @@ class Certificate extends \Quik\CommandAbstract
         .'For some fields there will be a default value,'.PHP_EOL
         ."If you enter '.', the field will be left blank.".PHP_EOL
         .'-----');
-        
         $country    = $this->prompt('Country Name (2 letter code) [US]:');
         $state      = $this->prompt('State or Province Name (full name) [Idaho]:');
         $city       = $this->prompt("Locality Name (eg, city) [Coeur d'Alene]:");
         $company    = $this->prompt('Organization Name (eg, company) [Merchant Protocol, LLC]:');
         $unit       = $this->prompt('Organizational Unit Name (eg, section) [DevOps]:');
         $email      = $this->prompt('Email Address [...]:');
-        
         $subject = "/C=$country/ST=$state/L=$city/O=$company/OU=$unit/CN={$this->getFqdn()}/emailAddress=$email";
-        $params[] = $subject;
         
         $this->echo('Creating local ssl certificate', SELF::YELLOW);
         $this->_shell->execute("mkdir -p /etc/ssl/private/");
         $this->_shell->execute("mkdir -p /etc/ssl/certs/");
         
-        $this->_shell->execute("sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s -out %s -subj %s", $params);
-        // show the results
-        $keyfile = $this->_shell->execute("sudo cat %s", [$params[0]]);
-        if (strpos($keyfile->output, 'No such file or directory') === false) {
-            echo $params[0].PHP_EOL;
-            echo PHP_EOL;
-            echo $keyfile->output.PHP_EOL;
-            echo PHP_EOL;
-            echo PHP_EOL;
+        if ($this->getCsr()) {
+            $params = [ $keypath, "/etc/ssl/certs/{$this->getFqdn()}.csr", $subject ];
+            $this->_shell->execute("sudo openssl req -nodes -newkey rsa:2048 -keyout %s -out %s -subj %s", $params);
         } else {
-            $this->echo("The file {$params[0]} was not created.", SELF::YELLOW);
+            $params = [ $keypath, "/etc/ssl/certs/{$this->getFqdn()}.crt", $subject ];
+            $this->_shell->execute("sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout %s -out %s -subj %s", $params);
         }
-        if (file_exists($params[1])) {
-            $this->echoFile( $params[1] );
-        } else {
-            $this->echo("The file {$params[1]} was not created.", SELF::YELLOW);
+        // show the results
+        if (!$this->getParameters()->getQuiet())
+        {
+            $keyfile = $this->_shell->execute("sudo cat %s", [$params[0]]);
+            if (strpos($keyfile->output, 'No such file or directory') === false) {
+                echo $params[0].PHP_EOL;
+                echo PHP_EOL;
+                echo $keyfile->output.PHP_EOL;
+                echo PHP_EOL;
+                echo PHP_EOL;
+            } else {
+                $this->echo("The file {$params[0]} was not created.", SELF::YELLOW);
+            }
+            if (file_exists($params[1])) {
+                $this->echoFile( $params[1] );
+            } else {
+                $this->echo("The file {$params[1]} was not created.", SELF::YELLOW);
+            }
         }
         
         $this->echo("Your Certificates are ready to use!", SELF::GREEN);
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getCsr()
+    {
+        return $this->getParameters()->get('_cert_csr');
     }
     
     /**
@@ -135,6 +148,8 @@ class Certificate extends \Quik\CommandAbstract
         echo PHP_EOL;
         echo 'Options:'.PHP_EOL;
         echo '  -h, --help      Show this message'.PHP_EOL;
+        echo '  -q, --quiet     Command enters non-interactive mode and completes on it\'s own.'.PHP_EOL;
+        echo '  --csr           Do not self sign the certificate, only produce the certificate request file.'.PHP_EOL;
         echo PHP_EOL;
     }
     
