@@ -109,17 +109,7 @@ class CommandAbstract
     }
     
     /**
-     * 
-     * @return array
-     */
-    public static function getShorthands()
-    {
-        $class = get_called_class();
-        return $class::$commands;
-    }
-    
-    /**
-     * 
+     *
      * @return boolean
      */
     public function isQuiet()
@@ -128,6 +118,16 @@ class CommandAbstract
             $this->__quiet = $this->_app->getParameters()->getQuiet();
         }
         return $this->__quiet;
+    }
+    
+    /**
+     * 
+     * @return array
+     */
+    public static function getShorthands()
+    {
+        $class = get_called_class();
+        return $class::$commands;
     }
     
     /**
@@ -152,6 +152,15 @@ class CommandAbstract
             $this->__yes = $this->_app->getParameters()->getYes();
         }
         return $this->__yes;
+    }
+    
+    /**
+     *
+     * @return string
+     */
+    public function getBinMagento()
+    {
+        return $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'bin/magento';
     }
     
     /**
@@ -187,7 +196,8 @@ class CommandAbstract
     
     /**
      * 
-     * @param unknown $message
+     * @param string $message
+     * @return boolean
      */
     public function confirm($message)
     {
@@ -204,12 +214,29 @@ class CommandAbstract
     }
     
     /**
+     * Ask the user a question and return their input
      * 
+     * @param string $message
+     * @param string $color
      * @return string
      */
-    public function getBinMagento()
+    public function prompt($message, $color = SELF::NC)
     {
-        return $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'bin/magento';
+        $input = false;
+        // If this is an interactive terminal
+        if (!$this->isQuiet()) {
+            $this->echo($message." ", $color, false);
+            $handle = fopen ("php://stdin","r");
+            $input = trim(fgets($handle));
+        }
+        // If there's no input then look for the default in the message
+        if (!$input) {
+            preg_match('/(?<=\[).+?(?=\])/', $message, $match);
+            if (isset($match[0])) {
+                $input = $match[0];
+            }
+        }
+        return $input;
     }
     
     /**

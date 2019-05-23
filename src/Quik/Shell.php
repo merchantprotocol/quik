@@ -54,7 +54,7 @@ class Shell
     /**
      * Execute a command through the command line, passing properly escaped arguments, and return its output
      *
-     * @param string $command Command with optional argument markers '%s'
+     * @param string   $command Command with optional argument markers '%s'
      * @param string[] $arguments Argument values to substitute markers with
      * @return stdClass
      * @throws Exception
