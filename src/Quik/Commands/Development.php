@@ -38,13 +38,32 @@ class Development extends \Quik\CommandAbstract
      * 
      * @var array
      */
-    public static $commands = ['dev'];
+    public static $commands = ['dev', 'dev-build'];
+    
+    /**
+     * Display the help information for this command
+     */
+    public function showUsage()
+    {
+        echo 'Usage: quik dev [options]'.PHP_EOL;
+        echo PHP_EOL;
+        echo 'Options:'.PHP_EOL;
+        echo '  -h, --help          Show this message'.PHP_EOL;
+        echo '  -m, --mode          Place this project into developer mode.'.PHP_EOL;
+        echo '  -g, --gitignore     Deploy the server specific gitignore file for this project.'.PHP_EOL;
+        echo '  -t, --tail          Tail all of the error logs at once.'.PHP_EOL;
+        echo PHP_EOL;
+    }
     
     /**
      * Build Magento
      */
     public function execute()
     {
+        if ($this->getParameters()->getCalledCommand()=='dev-build') {
+            $this->executeDevBuild();
+            return;
+        }
         if ($this->getParameters()->getCount() == 1) {
             $this->showUsage();
             exit(0);
@@ -58,6 +77,57 @@ class Development extends \Quik\CommandAbstract
         if ($this->getTail()) {
             $this->executeTail();
         }
+    }
+    
+    /**
+     * 
+     */
+    public function executeDevBuild()
+    {
+        // check mode
+        $response = $this->_shell->execute($this->getBinMagento().' deploy:mode:show');
+        $mode = substr($response->output, strlen('Current application mode: '),9);
+        if ($mode == 'productio') {
+            if (!$this->confirm("The current mode is not set to developer. Would you like to update it?"))
+            {
+                $this->echo("For production environments we suggest that you use `quik build`. Aborting...", SELF::YELLOW);
+                exit(0);
+            }
+        }
+        
+        // confirm values
+        $this->showInfo();
+        if (!$this->confirm("Continue with the build?"))
+        {
+            $this->echo("Aborting...", SELF::YELLOW);
+            exit(0);
+        }
+        
+        $userGroup = '';
+        if ($this->getUser() || $this->getGroup()) {
+            $userGroup = $this->getUser().':'.$this->getGroup();
+        }
+        
+        if ($mode == 'productio') {
+            $response = $this->_shell->execute($this->getBinMagento().' deploy:mode:set developer');
+            $this->echo($response->output);
+        }
+        
+        $this->echo('Updating Permissions...');
+        $this->run("permissions -y -q $userGroup");
+        $this->echo('Done Updating Permissions!');
+        
+        $this->run("clear -y");
+        $response = $this->_shell->execute($this->getBinMagento().' app:config:import');
+        $this->echo($response->output);
+        $response = $this->_shell->execute($this->getBinMagento().' setup:upgrade');
+        $this->echo($response->output);
+        $response = $this->_shell->execute($this->getBinMagento().' indexer:reindex');
+        $this->echo($response->output);
+        
+        $this->echo('Updating Permissions...');
+        $this->run("permissions -y -q $userGroup");
+        $this->echo('Done Updating Permissions!');
     }
     
     /**
@@ -155,20 +225,5 @@ class Development extends \Quik\CommandAbstract
     public function getTail()
     {
         return $this->getParameters()->get('__development_t');
-    }
-    
-    /**
-     * Display the help information for this command
-     */
-    public function showUsage()
-    {
-        echo 'Usage: quik dev [options]'.PHP_EOL;
-        echo PHP_EOL;
-        echo 'Options:'.PHP_EOL;
-        echo '  -h, --help          Show this message'.PHP_EOL;
-        echo '  -m, --mode          Place this project into developer mode.'.PHP_EOL;
-        echo '  -g, --gitignore     Deploy the server specific gitignore file for this project.'.PHP_EOL;
-        echo '  -t, --tail          Tail all of the error logs at once.'.PHP_EOL;
-        echo PHP_EOL;
     }
 }

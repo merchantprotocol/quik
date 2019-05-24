@@ -37,6 +37,23 @@ class Permissions extends \Quik\CommandAbstract
     public static $commands = ['permi'];
     
     /**
+     * Display the help information for this command
+     */
+    public function showUsage()
+    {
+        echo 'Usage: quik permi [options]'.PHP_EOL;
+        echo ' Update the file permissions for your magento installation. This command will'.PHP_EOL;
+        echo ' run an optimized script to only locate those files which do not already have the'.PHP_EOL;
+        echo ' proper permissions. For large codebases this will significantly speed up this'.PHP_EOL;
+        echo ' operation.'.PHP_EOL;
+        echo PHP_EOL;
+        echo 'Options:'.PHP_EOL;
+        echo '  -h, --help          Show this message'.PHP_EOL;
+        echo '  -y                  Disable the maintenance page.'.PHP_EOL;
+        echo PHP_EOL;
+    }
+    
+    /**
      * 
      */
     public function execute()

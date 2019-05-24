@@ -41,6 +41,21 @@ class Maintenance extends \Quik\CommandAbstract
     public static $commands = ['splash'];
     
     /**
+     * Display the help information for this command
+     */
+    public function showUsage()
+    {
+        echo 'Usage: quik splash [options]'.PHP_EOL;
+        echo ' It takes time to lookup your IP address and remember how the magento'.PHP_EOL;
+        echo ' maintenance command is structured. Now just run `quick splash`.'.PHP_EOL;
+        echo PHP_EOL;
+        echo 'Options:'.PHP_EOL;
+        echo '  -h, --help          Show this message'.PHP_EOL;
+        echo '  -o, --ff            Disable the maintenance page.'.PHP_EOL;
+        echo PHP_EOL;
+    }
+    
+    /**
      * Build Magento
      */
     public function execute()

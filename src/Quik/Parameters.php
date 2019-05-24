@@ -51,6 +51,7 @@ class Parameters
     protected $__version_minor = false;
     protected $__version_patch = false;
     
+    protected $_called = null;
     protected $_command = false;
     protected $_commands = [];
     protected $_args = [];
@@ -112,6 +113,7 @@ class Parameters
                     
                 } elseif (!$this->_command && $command = $this->in_array_r($arg, $commands)) {
                     $this->_command = $command;
+                    $this->_called = $arg;
                 } else {
                     $this->_args[] = $arg;
                 }
@@ -149,6 +151,25 @@ class Parameters
     public function getHelp()
     {
         return $this->_help;
+    }
+    
+    /**
+     * Returns a list of command classes
+     * 
+     * @return array
+     */
+    public function getCommands()
+    {
+        return array_keys($this->_commands);
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getCalledCommand()
+    {
+        return $this->_called;
     }
     
     /**

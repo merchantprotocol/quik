@@ -35,6 +35,24 @@ namespace Quik\Commands;
 class Changelog extends \Quik\CommandAbstract
 {
     /**
+     * Display the help information for this command
+     */
+    public function showUsage()
+    {
+        echo ' Usage: quik changelog [options]'.PHP_EOL;
+        echo ' This command should be run after a successful QC test has been completed. A'.PHP_EOL;
+        echo ' list of your commits will be organized and your changelog will be updated.'.PHP_EOL;
+        echo ' Use this in conjunction with `quik version` to create a proper release.'.PHP_EOL;
+        echo PHP_EOL;
+        echo ' Options:'.PHP_EOL;
+        echo '  -h, --help          Show this message'.PHP_EOL;
+        echo PHP_EOL;
+        echo ' Run `quik changelog` and we\'ll use your local git repo to update '.SELF::CHANGLOG_FILENAME.PHP_EOL;
+        echo ' since your last tag.'.PHP_EOL;
+        echo PHP_EOL;
+    }
+    
+    /**
      * 
      * @var string
      */
@@ -55,15 +73,19 @@ class Changelog extends \Quik\CommandAbstract
             }
         }
         
+        $this->show_status(10,100);
         $filename = $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.SELF::CHANGLOG_FILENAME;
         
         // building the changlog text
         $changlog = 'DEVELOPMENT'.PHP_EOL.'============='.PHP_EOL;
         $changlog .= $this->getFormattedCommits();
+        $this->show_status(40,100);
         $changlog .= file_get_contents($filename);
+        $this->show_status(80,100);
         
         // update the changelog
         file_put_contents( $filename, $changlog );
+        $this->show_status(100,100);
         $this->echo('Changlog has been updated!', SELF::GREEN);
     }
     
@@ -154,17 +176,5 @@ class Changelog extends \Quik\CommandAbstract
             $log .= '    * '.$commit['message'].PHP_EOL;
         }
         return $log.PHP_EOL;
-    }
-    
-    /**
-     * Display the help information for this command
-     */
-    public function showUsage()
-    {
-        echo 'Usage: quik dev [options]'.PHP_EOL;
-        echo PHP_EOL;
-        echo 'Options:'.PHP_EOL;
-        echo '  -h, --help          Show this message'.PHP_EOL;
-        echo PHP_EOL;
     }
 }

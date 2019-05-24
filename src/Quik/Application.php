@@ -42,6 +42,12 @@ class Application
     CONST VERSION = '0.0.4';
     
     /**
+     * Common used line break
+     * @var string
+     */
+    CONST LB = PHP_EOL."============================================================================= ".PHP_EOL;
+    
+    /**
      *
      * @var \Quik\Parameters
      */
@@ -90,8 +96,25 @@ class Application
         }
         // No command error
         if (!$this->_commandClass) {
-            $this->showError();
+            if ($this->_parameters->getCalledCommand()) {
+                $this->showError();
+            }
             $this->showUsage();
+            foreach($this->_parameters->getCommands() as $class) {
+                $classname = '\Quik\Commands\\'.$class;
+                $_command = new $classname($this);
+                if (is_callable(array($_command, 'showUsage'))) {
+                    echo SELF::LB." $class".SELF::LB;
+                    $_command->showUsage();
+                }
+            }
+            echo SELF::LB." Command Prompt".SELF::LB;
+            
+            foreach($this->_parameters->getCommands() as $key => $class) {
+                echo \Quik\CommandAbstract::YELLOW."    $key) $class".\Quik\CommandAbstract::NC.PHP_EOL;
+            }
+            echo PHP_EOL;
+            
             exit(0);
         }
         $this->run( $this->getParameters()->getCommand() );
@@ -188,17 +211,21 @@ class Application
         echo "            ZZZZZZZZ       | |   | | | (_) | || (_) | (_| (_) | |".PHP_EOL;
         echo "              ZZZZ         |_|   |_|  \___/ \__\___/ \___\___/|_|".PHP_EOL;
         echo \Quik\CommandAbstract::NC.PHP_EOL;
+        echo ' Homepage: https://merchantprotocol.com/'.PHP_EOL;
+        echo ' Author: Jack <jonathon@merchantprotocol.com>'.PHP_EOL;
+        echo ' Version: Quik v'.SELF::VERSION.PHP_EOL;
+        echo ' '.PHP_EOL;
+        echo ' '.PHP_EOL;
         echo PHP_EOL;
-        echo 'Usage: quik <command> [options] [args]'.PHP_EOL;
+        echo ' Usage: quik <command> [options] [args]'.PHP_EOL;
         echo PHP_EOL;
-        echo 'Options:'.PHP_EOL;
+        echo ' Options:'.PHP_EOL;
         echo '  -h, --help      Show this message'.PHP_EOL;
         echo '  -q, --quiet     Causes quik to return no output'.PHP_EOL;
         //         echo '  -v, --verbose   Display the verbose of every command'.PHP_EOL;
         echo '  -y              Automatically confirm all prompts'.PHP_EOL;
         echo PHP_EOL;
         echo PHP_EOL;
-        exit(0);
     }
     
     /**

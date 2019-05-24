@@ -35,18 +35,33 @@ namespace Quik\Commands;
 class Clear extends \Quik\CommandAbstract
 {
     /**
+     * Display the help information for this command
+     */
+    public function showUsage()
+    {
+        echo ' Usage: quik clear [options]'.PHP_EOL;
+        echo ' This command will clear out all of your temporary, static, and generated'.PHP_EOL;
+        echo ' code directories.'.PHP_EOL;
+        echo PHP_EOL;
+        echo ' Options:'.PHP_EOL;
+        echo '  -h, --help          Show this message'.PHP_EOL;
+        echo '  -y                  Preapprove the confirmation prompt.'.PHP_EOL;
+        echo PHP_EOL;
+    }
+    
+    /**
      * @see https://devdocs.magento.com/guides/v2.3/howdoi/php/php_clear-dirs.html
      */
     public function execute()
     {
         $dirs = [
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/page_cache',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/cache',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/composer_home',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/view_preprocessed',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'generated/code',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'generated/metadata',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'pub/static',
+            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/page_cache/*',
+            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/cache/*',
+            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/composer_home/*',
+            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/view_preprocessed/*',
+            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'generated/code/*',
+            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'generated/metadata/*',
+            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'pub/static/*',
         ];
         
         echo 'Directories to be cleared:'.PHP_EOL;

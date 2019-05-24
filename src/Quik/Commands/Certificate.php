@@ -41,6 +41,23 @@ class Certificate extends \Quik\CommandAbstract
     public static $commands = ['cert'];
     
     /**
+     * Display the help information for this command
+     */
+    public function showUsage()
+    {
+        echo 'Usage: quik cert [options] <FQDN.domain.name>'.PHP_EOL;
+        echo ' This command was designed for your development and staging servers. It\s import to test'.PHP_EOL;
+        echo ' your installation with an SSL certificate in place. You can choose to self sign your cert'.PHP_EOL;
+        echo ' or create a certificate request signature (csr) file to provide to your hosting provider.'.PHP_EOL;
+        echo PHP_EOL;
+        echo 'Options:'.PHP_EOL;
+        echo '  -h, --help      Show this message'.PHP_EOL;
+        echo '  -q, --quiet     Command enters non-interactive mode and completes on it\'s own.'.PHP_EOL;
+        echo '  --csr           Do not self sign the certificate, only produce the certificate request file.'.PHP_EOL;
+        echo PHP_EOL;
+    }
+    
+    /**
      * 
      * @var string
      */
@@ -57,10 +74,8 @@ class Certificate extends \Quik\CommandAbstract
      */
     public function execute()
     {
-        if (!$this->isValid()) {
-            $this->showError();
-            $this->showUsage();
-            exit(0);
+        while (!$this->isValid()) {
+            $this->_fqdn = $this->prompt('You entered an incorrect domain ('.$this->_fqdn.'), try again:');
         }
         
         $keypath = "/etc/ssl/private/{$this->getFqdn()}.key";
@@ -136,20 +151,6 @@ class Certificate extends \Quik\CommandAbstract
         echo PHP_EOL;
         echo $response->output.PHP_EOL;
         echo PHP_EOL;
-        echo PHP_EOL;
-    }
-    
-    /**
-     * Display the help information for this command
-     */
-    public function showUsage()
-    {
-        echo 'Usage: quik cert [options] <FQDN.domain.name>'.PHP_EOL;
-        echo PHP_EOL;
-        echo 'Options:'.PHP_EOL;
-        echo '  -h, --help      Show this message'.PHP_EOL;
-        echo '  -q, --quiet     Command enters non-interactive mode and completes on it\'s own.'.PHP_EOL;
-        echo '  --csr           Do not self sign the certificate, only produce the certificate request file.'.PHP_EOL;
         echo PHP_EOL;
     }
     
