@@ -47,6 +47,9 @@ class Parameters
     protected $__development_m = false;
     protected $__development_g = false;
     protected $__development_t = false;
+    protected $__version_major = false;
+    protected $__version_minor = false;
+    protected $__version_patch = false;
     
     protected $_command = false;
     protected $_commands = [];
@@ -88,6 +91,13 @@ class Parameters
                     $this->_quiet = true;
                 } elseif ($arg == '-v' || $arg == '--verbose') {
                     $this->_verbose = true;
+                    
+                } elseif ($arg == '--major') {
+                    $this->__version_major = true;
+                } elseif ($arg == '--minor') {
+                    $this->__version_minor = true;
+                } elseif ($arg == '--patch') {
+                    $this->__version_patch = true;
                     
                 } elseif ($arg == '-m' || $arg == '--mode') {
                     $this->__development_m = true;
