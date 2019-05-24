@@ -39,7 +39,7 @@ class Application
      * 
      * @var string
      */
-    CONST VERSION = '0.0.4';
+    CONST VERSION = '0.0.5';
     
     /**
      * Common used line break
@@ -79,6 +79,7 @@ class Application
         $this->_webroot = $webroot;
         $this->_parameters = $parameters;
         $this->_commandClass = $this->getParameters()->getCommand();
+        $command = $this->getParameters()->getCommand();
         
         // display version
         if ($this->_parameters->getVersion()) {
@@ -100,24 +101,44 @@ class Application
                 $this->showError();
             }
             $this->showUsage();
-            foreach($this->_parameters->getCommands() as $class) {
+            $commands = $this->_parameters->getCommands();
+            foreach($commands as $class) {
                 $classname = '\Quik\Commands\\'.$class;
                 $_command = new $classname($this);
                 if (is_callable(array($_command, 'showUsage'))) {
                     echo SELF::LB." $class".SELF::LB;
                     $_command->showUsage();
+                    
+                    echo \Quik\CommandAbstract::YELLOW.' More.. '.\Quik\CommandAbstract::NC;
+                    $handle = fopen ("php://stdin","r");
+                    $input = trim(fgets($handle));
+                    flush();
+                    echo PHP_EOL;
+                    
                 }
             }
             echo SELF::LB." Command Prompt".SELF::LB;
             
-            foreach($this->_parameters->getCommands() as $key => $class) {
+            foreach($commands as $key => $class) {
                 echo \Quik\CommandAbstract::YELLOW."    $key) $class".\Quik\CommandAbstract::NC.PHP_EOL;
             }
             echo PHP_EOL;
             
-            exit(0);
+            echo \Quik\CommandAbstract::YELLOW.' Choose a command to run: '.\Quik\CommandAbstract::NC;
+            $handle = fopen ("php://stdin","r");
+            $input = trim(fgets($handle));
+            if (!strlen($input)) {
+                exit(0);
+            }
+            if (isset($commands[$input])) {
+                $command = $commands[$input];
+            } elseif (in_array($input, $commands)) {
+                $command = $input;
+            } else {
+                exit(0);
+            }
         }
-        $this->run( $this->getParameters()->getCommand() );
+        $this->run( $command );
     }
     
     /**
