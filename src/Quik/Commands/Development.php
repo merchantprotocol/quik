@@ -3,19 +3,19 @@
  * NOTICE OF LICENSE
  *
  * MIT License
- * 
+ *
  * Copyright (c) 2019 Merchant Protocol
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * 
+ *
  * @category   merchantprotocol
  * @package    merchantprotocol/quik
  * @copyright  Copyright (c) 2019 Merchant Protocol, LLC (https://merchantprotocol.com/)
@@ -35,7 +35,7 @@ namespace Quik\Commands;
 class Development extends \Quik\CommandAbstract
 {
     /**
-     * 
+     *
      * @var array
      */
     public static $commands = ['dev', 'dev:build'];
@@ -80,7 +80,7 @@ class Development extends \Quik\CommandAbstract
     }
     
     /**
-     * 
+     *
      */
     public function executeDevBuild()
     {
@@ -96,11 +96,13 @@ class Development extends \Quik\CommandAbstract
         }
         
         // confirm values
-        $this->showInfo();
-        if (!$this->confirm("Continue with the build?"))
-        {
-            $this->echo("Aborting...", SELF::YELLOW);
-            exit(0);
+        if (!$this->getUser() || !$this->getGroup()) {
+            $this->showInfo();
+            if (!$this->confirm("Continue with the build?"))
+            {
+                $this->echo("Aborting...", SELF::YELLOW);
+                exit(0);
+            }
         }
         
         $userGroup = '';
@@ -109,29 +111,40 @@ class Development extends \Quik\CommandAbstract
         }
         
         if ($mode == 'productio') {
-            $response = $this->_shell->execute($this->getBinMagento().' deploy:mode:set developer');
-            $this->echo($response->output);
+            $this->show_status(0,100, 'Enabling Developer Mode');
+            $this->_shell->execute($this->getBinMagento().' deploy:mode:set developer');
         }
         
-        $this->echo('Updating Permissions...');
+        $this->show_status(5,100, 'Updating Permissions');
         $this->run("permissions -y -q $userGroup");
-        $this->echo('Done Updating Permissions!');
         
-        $this->run("clear -y");
+        $this->show_status(25,100, 'Clearing Directories');
+        $this->run("clear -y -q");
+        
+        $this->show_status(35,100, 'Running Composer');
+        $this->_shell->execute("composer install");
+        $this->_shell->execute("composer update");
+        
+        $this->show_status(45,100, 'Inporting Configuration');
         $response = $this->_shell->execute($this->getBinMagento().' app:config:import');
-        $this->echo($response->output);
-        $response = $this->_shell->execute($this->getBinMagento().' setup:upgrade');
-        $this->echo($response->output);
-        $response = $this->_shell->execute($this->getBinMagento().' indexer:reindex');
-        $this->echo($response->output);
         
-        $this->echo('Updating Permissions...');
+        $this->show_status(50,100, "Disabling Merged Assets");
+        $this->run("n -q config:store:set dev/css/merge_css_files 0");
+        $this->run("n -q config:store:set dev/css/minify_files 0");
+        $this->run("n -q config:store:set dev/js/merge_files 0");
+        $this->run("n -q config:store:set dev/js/enable_js_bundling 0");
+        $this->run("n -q config:store:set dev/js/minify_files 0");
+        
+        $this->show_status(60,100, 'Running setup:upgrade');
+        $response = $this->_shell->execute($this->getBinMagento().' setup:upgrade');
+        
+        $this->show_status(80,100, 'Updating Permissions');
         $this->run("permissions -y -q $userGroup");
-        $this->echo('Done Updating Permissions!');
+        $this->show_status(100,100, 'Done with dev:build');
     }
     
     /**
-     * 
+     *
      */
     public function executeMode()
     {
@@ -141,7 +154,7 @@ class Development extends \Quik\CommandAbstract
     }
     
     /**
-     * 
+     *
      */
     public function executeGitignore()
     {
@@ -176,7 +189,7 @@ class Development extends \Quik\CommandAbstract
     }
     
     /**
-     * 
+     *
      */
     public function executeTail()
     {
@@ -197,11 +210,11 @@ class Development extends \Quik\CommandAbstract
             ob_flush();
             flush();
         }
-//         pclose($handle);
+        //         pclose($handle);
     }
     
     /**
-     * 
+     *
      * @return boolean
      */
     public function getMode()

@@ -57,7 +57,7 @@ class n98 extends \Quik\CommandAbstract
     public function execute()
     {
         $cmd =  implode(' ', $this->getArgs());
-        $this->_exec($cmd);
+        $this->_exec($cmd, !$this->getParameters()->getQuiet());
     }
     
     /**
@@ -65,8 +65,8 @@ class n98 extends \Quik\CommandAbstract
      * 
      * @param string $cmd
      */
-    protected function _exec( $cmd )
+    protected function _exec( $cmd, $interactive = true )
     {
-        $this->_shell->execute('php '.$this->_app->getQuikDir().DIRECTORY_SEPARATOR.'n98-magerun2.phar '.$cmd ,[],true);
+        $this->_shell->execute('php '.$this->_app->getQuikDir().DIRECTORY_SEPARATOR.'n98-magerun2.phar '.$cmd ,[],$interactive);
     }
 }

@@ -65,13 +65,13 @@ class CommandAbstract
     public static $commands = [];
     
     /**
-     * 
+     *
      * @var \Quik\Shell
      */
     protected $_shell = NULL;
     
     /**
-     * 
+     *
      * @var \Quik\Application
      */
     protected $_app = null;
@@ -84,7 +84,7 @@ class CommandAbstract
     protected $_group = null;
     
     /**
-     * 
+     *
      * @param \Quik\Application $app
      */
     public function __construct(\Quik\Application $app)
@@ -99,7 +99,7 @@ class CommandAbstract
     public function execute(){}
     
     /**
-     * 
+     *
      * @param string $script
      */
     public function run($script = '')
@@ -121,7 +121,7 @@ class CommandAbstract
     }
     
     /**
-     * 
+     *
      * @return array
      */
     public static function getShorthands()
@@ -152,7 +152,7 @@ class CommandAbstract
     }
     
     /**
-     * 
+     *
      * @return boolean
      */
     public function getYes()
@@ -173,7 +173,7 @@ class CommandAbstract
     }
     
     /**
-     * 
+     *
      * @param string $message
      * @param string $color
      * @param boolean $linebreak
@@ -188,7 +188,7 @@ class CommandAbstract
     }
     
     /**
-     * 
+     *
      * @param string $message
      * @return boolean
      */
@@ -204,7 +204,7 @@ class CommandAbstract
     }
     
     /**
-     * 
+     *
      * @param string $message
      * @return boolean
      */
@@ -224,7 +224,7 @@ class CommandAbstract
     
     /**
      * Ask the user a question and return their input
-     * 
+     *
      * @param string $message
      * @param string $color
      * @return string
@@ -291,7 +291,7 @@ class CommandAbstract
     }
     
     /**
-     * 
+     *
      */
     public function showInfo()
     {
@@ -308,25 +308,35 @@ class CommandAbstract
     }
     
     /**
-     * 
-     * @param unknown $done
-     * @param unknown $total
+     * Need to know how long the last status bar message was so that I can erase it.
+     * @var int
+     */
+    protected $_lastSize = 0;
+    
+    /**
+     *
+     * @param integer $done
+     * @param integer $total
+     * @param string $msg
      * @param number $size
      */
-    function show_status($done, $total, $size=30) {
+    function show_status($done, $total, $msg='', $size=30) {
         static $start_time;
         
         // if we go over our bound, just ignore it
         if($done > $total) return;
         
-        if(empty($start_time)) $start_time=time();
+        if(empty($start_time)) {
+            $this->_lastSize = 0;
+            $start_time=time();
+        }
         $now = time();
         
         $perc=(double)($done/$total);
         
         $bar=floor($perc*$size);
         
-        $status_bar="\r[";
+        $status_bar="\r[".\Quik\CommandAbstract::GREEN;
         $status_bar.=str_repeat("=", $bar);
         if($bar<$size){
             $status_bar.=">";
@@ -337,7 +347,7 @@ class CommandAbstract
         
         $disp=number_format($perc*100, 0);
         
-        $status_bar.="] $disp%  $done/$total";
+        $status_bar.=\Quik\CommandAbstract::NC."] $disp%";
         
         $rate = ($now-$start_time)/$done;
         $left = $total - $done;
@@ -345,9 +355,16 @@ class CommandAbstract
         
         $elapsed = $now - $start_time;
         
-        $status_bar.= " remaining: ".number_format($eta)." sec.  elapsed: ".number_format($elapsed)." sec.";
         
-        echo "$status_bar  ";
+        $status_bar.= " ".number_format($elapsed)."s $msg";
+        
+        echo chr(27)."[0G"; // return to first column on this line
+        while (strlen($status_bar) < $this->_lastSize)
+        {
+            $status_bar .= ' ';
+        }
+        $this->_lastSize = strlen($status_bar);
+        echo $status_bar;
         
         flush();
         

@@ -60,6 +60,9 @@ class Gzip extends \Quik\CommandAbstract
      */
     public function showHtaccessInfo()
     {
+        if ($this->getParameters()->getQuiet()) {
+            return;
+        }
         $this->echo(".htaccess ------------------------------------------------");
         echo "".PHP_EOL;
         echo "".PHP_EOL;

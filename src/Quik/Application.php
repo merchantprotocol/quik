@@ -39,7 +39,46 @@ class Application
      * 
      * @var string
      */
-    CONST VERSION = '0.0.5';
+    CONST VERSION = '0.0.6';
+    
+    /**
+     * Display the help information
+     *
+     */
+    public function showUsage()
+    {
+        echo PHP_EOL;
+        echo \Quik\CommandAbstract::GREEN.PHP_EOL;
+        echo "                            __  __               _                 _".PHP_EOL;
+        echo "             ZZZZZ         |  \/  |             | |               | |".PHP_EOL;
+        echo "        ZZZZZZZZZZZZZZZ    | \  / | ___ _ __ ___| |__   __ _ _ __ | |_".PHP_EOL;
+        echo "        ZZZZZ ZZZZZZZZZ    | |\/| |/ _ \ '__/ __| '_ \ / _` | '_ \| __|".PHP_EOL;
+        echo "        ZZZZ ZZZZZZZZZZ    | |  | |  __/ | | (__| | | | (_| | | | | |_".PHP_EOL;
+        echo "        ZZI          ZZ    |_|  |_|\___|_|  \___|_| |_|\__,_|_| |_|\__|".PHP_EOL;
+        echo "        ZZZZZZZZZZZZZZZ".PHP_EOL;
+        echo "        ZZZ          ZZ     _____           _                  _".PHP_EOL;
+        echo "         ZZZZZZZZZZ ZZZ    |  __ \         | |                | |".PHP_EOL;
+        echo "         ZZZZZZZZZ ZZZ     | |__) | __ ___ | |_ ___   ___ ___ | |".PHP_EOL;
+        echo "           ZZZZZZZZZZ      |  ___/ '__/ _ \| __/ _ \ / __/ _ \| |".PHP_EOL;
+        echo "            ZZZZZZZZ       | |   | | | (_) | || (_) | (_| (_) | |".PHP_EOL;
+        echo "              ZZZZ         |_|   |_|  \___/ \__\___/ \___\___/|_|".PHP_EOL;
+        echo \Quik\CommandAbstract::NC.PHP_EOL;
+        echo ' Homepage: '.\Quik\CommandAbstract::GREEN.'https://merchantprotocol.com/'.\Quik\CommandAbstract::NC.PHP_EOL;
+        echo ' Author: Jack <jonathon@merchantprotocol.com>'.PHP_EOL;
+        echo ' Version: Quik v'.SELF::VERSION.PHP_EOL;
+        echo ' '.PHP_EOL;
+        echo ' '.PHP_EOL;
+        echo PHP_EOL;
+        echo ' Usage: quik <command> [options] [args]'.PHP_EOL;
+        echo PHP_EOL;
+        echo ' Options:'.PHP_EOL;
+        echo '  -h, --help      Show this message'.PHP_EOL;
+        echo '  -q, --quiet     Causes quik to return no output'.PHP_EOL;
+        //         echo '  -v, --verbose   Display the verbose of every command'.PHP_EOL;
+        echo '  -y              Automatically confirm all prompts'.PHP_EOL;
+        echo PHP_EOL;
+        echo PHP_EOL;
+    }
     
     /**
      * Common used line break
@@ -209,45 +248,6 @@ class Application
     public function getParameters()
     {
         return $this->_parameters;
-    }
-    
-    /**
-     * Display the help information
-     *
-     */
-    public function showUsage()
-    {
-        echo PHP_EOL;
-        echo \Quik\CommandAbstract::GREEN.PHP_EOL;
-        echo "                            __  __               _                 _".PHP_EOL;
-        echo "             ZZZZZ         |  \/  |             | |               | |".PHP_EOL;
-        echo "        ZZZZZZZZZZZZZZZ    | \  / | ___ _ __ ___| |__   __ _ _ __ | |_".PHP_EOL;
-        echo "        ZZZZZ ZZZZZZZZZ    | |\/| |/ _ \ '__/ __| '_ \ / _` | '_ \| __|".PHP_EOL;
-        echo "        ZZZZ ZZZZZZZZZZ    | |  | |  __/ | | (__| | | | (_| | | | | |_".PHP_EOL;
-        echo "        ZZI          ZZ    |_|  |_|\___|_|  \___|_| |_|\__,_|_| |_|\__|".PHP_EOL;
-        echo "        ZZZZZZZZZZZZZZZ".PHP_EOL;
-        echo "        ZZZ          ZZ     _____           _                  _".PHP_EOL;
-        echo "         ZZZZZZZZZZ ZZZ    |  __ \         | |                | |".PHP_EOL;
-        echo "         ZZZZZZZZZ ZZZ     | |__) | __ ___ | |_ ___   ___ ___ | |".PHP_EOL;
-        echo "           ZZZZZZZZZZ      |  ___/ '__/ _ \| __/ _ \ / __/ _ \| |".PHP_EOL;
-        echo "            ZZZZZZZZ       | |   | | | (_) | || (_) | (_| (_) | |".PHP_EOL;
-        echo "              ZZZZ         |_|   |_|  \___/ \__\___/ \___\___/|_|".PHP_EOL;
-        echo \Quik\CommandAbstract::NC.PHP_EOL;
-        echo ' Homepage: '.\Quik\CommandAbstract::GREEN.'https://merchantprotocol.com/'.\Quik\CommandAbstract::NC.PHP_EOL;
-        echo ' Author: Jack <jonathon@merchantprotocol.com>'.PHP_EOL;
-        echo ' Version: Quik v'.SELF::VERSION.PHP_EOL;
-        echo ' '.PHP_EOL;
-        echo ' '.PHP_EOL;
-        echo PHP_EOL;
-        echo ' Usage: quik <command> [options] [args]'.PHP_EOL;
-        echo PHP_EOL;
-        echo ' Options:'.PHP_EOL;
-        echo '  -h, --help      Show this message'.PHP_EOL;
-        echo '  -q, --quiet     Causes quik to return no output'.PHP_EOL;
-        //         echo '  -v, --verbose   Display the verbose of every command'.PHP_EOL;
-        echo '  -y              Automatically confirm all prompts'.PHP_EOL;
-        echo PHP_EOL;
-        echo PHP_EOL;
     }
     
     /**
