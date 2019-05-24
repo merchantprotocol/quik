@@ -52,6 +52,7 @@ class Parameters
     protected $__version_patch = false;
     
     protected $_called = null;
+    protected $_subcall = 'execute';
     protected $_command = false;
     protected $_commands = [];
     protected $_args = [];
@@ -114,6 +115,15 @@ class Parameters
                 } elseif (!$this->_command && $command = $this->in_array_r($arg, $commands)) {
                     $this->_command = $command;
                     $this->_called = $arg;
+                    if (strpos($arg,":")!==false) {
+                        $_parts = explode(':',$arg);
+                        foreach($_parts as $_key => $_part) {
+                            $_parts[$_key] = ucfirst($_part);
+                        }
+                        unset($_parts[0]);
+                        $arg = implode('',$_parts);
+                        $this->_subcall = 'execute'.$arg;
+                    }
                 } else {
                     $this->_args[] = $arg;
                 }
@@ -170,6 +180,15 @@ class Parameters
     public function getCalledCommand()
     {
         return $this->_called;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getSubCall()
+    {
+        return $this->_subcall;
     }
     
     /**

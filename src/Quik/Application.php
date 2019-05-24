@@ -202,7 +202,7 @@ class Application
     {
         $classname = '\Quik\Commands\\'.$command;
         $this->_command = new $classname($this);
-        $this->_command->execute();
+        $this->_command->{$this->_parameters->getSubCall()}();
     }
     
     /**

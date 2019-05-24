@@ -60,10 +60,6 @@ class Development extends \Quik\CommandAbstract
      */
     public function execute()
     {
-        if ($this->getParameters()->getCalledCommand()=='dev:build') {
-            $this->executeDevBuild();
-            return;
-        }
         if ($this->getParameters()->getCount() == 1) {
             $this->showUsage();
             exit(0);
@@ -82,7 +78,7 @@ class Development extends \Quik\CommandAbstract
     /**
      *
      */
-    public function executeDevBuild()
+    public function executeBuild()
     {
         // check mode
         $response = $this->_shell->execute($this->getBinMagento().' deploy:mode:show');
