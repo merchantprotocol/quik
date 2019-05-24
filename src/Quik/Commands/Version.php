@@ -35,6 +35,28 @@ namespace Quik\Commands;
 class Version extends \Quik\CommandAbstract
 {
     /**
+     * Display the help information for this command
+     */
+    public function showUsage()
+    {
+        echo 'Usage: '.\Quik\CommandAbstract::GREEN.'quik version [options] <new.value>'.\Quik\CommandAbstract::NC.PHP_EOL;
+        echo PHP_EOL;
+        echo 'Options:'.PHP_EOL;
+        echo '  -h, --help        Show this message'.PHP_EOL;
+        echo '  Just use one of the following options and the version will be automatically increased.'.PHP_EOL;
+        echo '  --major      Increases the major, resets minor and patch to 0'.PHP_EOL;
+        echo '  --minor      Ignores major, increases minor, resets patch to 0'.PHP_EOL;
+        echo '  --patch      Ignores major and minor, increases patch by one'.PHP_EOL;
+        echo PHP_EOL;
+        echo 'If you enter a number after an option it will override the existing number, leaving other sections untouched.'.PHP_EOL;
+        echo 'If current version is 1.1.1 and you enter `quik version --minor` the new version will be 1.2.0.'.PHP_EOL;
+        echo 'If current version is 1.1.1 and you enter `quik version --minor 4` the new version will be 1.4.1.'.PHP_EOL;
+        echo 'Ignore the options and just enter a new version number as major.minor.patch (e.g. 0.0.1)'.PHP_EOL;
+        echo 'If current version is 1.1.1 and you enter `quik version 1.2.3` the new version will be 1.2.3.'.PHP_EOL;
+        echo PHP_EOL;
+    }
+    
+    /**
      * The name of the version file that we keep on record
      * @var string
      */
@@ -55,28 +77,6 @@ class Version extends \Quik\CommandAbstract
      * @var array
      */
     protected $_data = [];
-    
-    /**
-     * Display the help information for this command
-     */
-    public function showUsage()
-    {
-        echo 'Usage: quik version [options] <new.value>'.PHP_EOL;
-        echo PHP_EOL;
-        echo 'Options:'.PHP_EOL;
-        echo '  -h, --help        Show this message'.PHP_EOL;
-        echo '  Just use one of the following options and the version will be automatically increased.'.PHP_EOL;
-        echo '  --major      Increases the major, resets minor and patch to 0'.PHP_EOL;
-        echo '  --minor      Ignores major, increases minor, resets patch to 0'.PHP_EOL;
-        echo '  --patch      Ignores major and minor, increases patch by one'.PHP_EOL;
-        echo PHP_EOL;
-        echo 'If you enter a number after an option it will override the existing number, leaving other sections untouched.'.PHP_EOL;
-        echo 'If current version is 1.1.1 and you enter `quik version --minor` the new version will be 1.2.0.'.PHP_EOL;
-        echo 'If current version is 1.1.1 and you enter `quik version --minor 4` the new version will be 1.4.1.'.PHP_EOL;
-        echo 'Ignore the options and just enter a new version number as major.minor.patch (e.g. 0.0.1)'.PHP_EOL;
-        echo 'If current version is 1.1.1 and you enter `quik version 1.2.3` the new version will be 1.2.3.'.PHP_EOL;
-        echo PHP_EOL;
-    }
     
     /**
      * @see https://devdocs.magento.com/guides/v2.3/howdoi/php/php_clear-dirs.html

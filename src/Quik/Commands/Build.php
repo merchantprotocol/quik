@@ -39,7 +39,7 @@ class Build extends \Quik\CommandAbstract
      */
     public function showUsage()
     {
-        echo ' Usage: quik build [options]'.PHP_EOL;
+        echo ' Usage: '.\Quik\CommandAbstract::GREEN.'quik build [options]'.\Quik\CommandAbstract::NC.PHP_EOL;
         echo ' This command was designed for your build server. We completely build your '.PHP_EOL;
         echo ' Magento codebase and commit it to your repository in preparation for a '.PHP_EOL;
         echo ' comprehensive manual quality control test. This will allow for a zero'.PHP_EOL;

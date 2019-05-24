@@ -39,7 +39,7 @@ class Clear extends \Quik\CommandAbstract
      */
     public function showUsage()
     {
-        echo ' Usage: quik clear [options]'.PHP_EOL;
+        echo ' Usage: '.\Quik\CommandAbstract::GREEN.'quik clear [options]'.\Quik\CommandAbstract::NC.PHP_EOL;
         echo ' This command will clear out all of your temporary, static, and generated'.PHP_EOL;
         echo ' code directories.'.PHP_EOL;
         echo PHP_EOL;

@@ -106,14 +106,15 @@ class Application
                 $classname = '\Quik\Commands\\'.$class;
                 $_command = new $classname($this);
                 if (is_callable(array($_command, 'showUsage'))) {
-                    echo SELF::LB." $class".SELF::LB;
+                    echo SELF::LB.\Quik\CommandAbstract::YELLOW." $class".\Quik\CommandAbstract::NC.SELF::LB;
                     $_command->showUsage();
                     
                     echo \Quik\CommandAbstract::YELLOW.' More.. '.\Quik\CommandAbstract::NC;
                     $handle = fopen ("php://stdin","r");
                     $input = trim(fgets($handle));
-                    flush();
-                    echo PHP_EOL;
+                    if ($input == 'q' || $input == 'c' || $input == 'w') {
+                        exit(0);
+                    }
                     
                 }
             }
@@ -232,7 +233,7 @@ class Application
         echo "            ZZZZZZZZ       | |   | | | (_) | || (_) | (_| (_) | |".PHP_EOL;
         echo "              ZZZZ         |_|   |_|  \___/ \__\___/ \___\___/|_|".PHP_EOL;
         echo \Quik\CommandAbstract::NC.PHP_EOL;
-        echo ' Homepage: https://merchantprotocol.com/'.PHP_EOL;
+        echo ' Homepage: '.\Quik\CommandAbstract::GREEN.'https://merchantprotocol.com/'.\Quik\CommandAbstract::NC.PHP_EOL;
         echo ' Author: Jack <jonathon@merchantprotocol.com>'.PHP_EOL;
         echo ' Version: Quik v'.SELF::VERSION.PHP_EOL;
         echo ' '.PHP_EOL;

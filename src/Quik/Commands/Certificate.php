@@ -45,7 +45,7 @@ class Certificate extends \Quik\CommandAbstract
      */
     public function showUsage()
     {
-        echo 'Usage: quik cert [options] <FQDN.domain.name>'.PHP_EOL;
+        echo 'Usage: '.\Quik\CommandAbstract::GREEN.'quik cert [options] <FQDN.domain.name>'.\Quik\CommandAbstract::NC.PHP_EOL;
         echo ' This command was designed for your development and staging servers. It\s import to test'.PHP_EOL;
         echo ' your installation with an SSL certificate in place. You can choose to self sign your cert'.PHP_EOL;
         echo ' or create a certificate request signature (csr) file to provide to your hosting provider.'.PHP_EOL;

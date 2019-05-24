@@ -45,7 +45,7 @@ class Maintenance extends \Quik\CommandAbstract
      */
     public function showUsage()
     {
-        echo 'Usage: quik splash [options]'.PHP_EOL;
+        echo 'Usage: '.\Quik\CommandAbstract::GREEN.'quik splash [options]'.\Quik\CommandAbstract::NC.PHP_EOL;
         echo ' It takes time to lookup your IP address and remember how the magento'.PHP_EOL;
         echo ' maintenance command is structured. Now just run `quick splash`.'.PHP_EOL;
         echo PHP_EOL;

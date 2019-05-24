@@ -39,7 +39,7 @@ class Changelog extends \Quik\CommandAbstract
      */
     public function showUsage()
     {
-        echo ' Usage: quik changelog [options]'.PHP_EOL;
+        echo ' Usage: '.\Quik\CommandAbstract::GREEN.'quik changelog [options]'.\Quik\CommandAbstract::NC.PHP_EOL;
         echo ' This command should be run after a successful QC test has been completed. A'.PHP_EOL;
         echo ' list of your commits will be organized and your changelog will be updated.'.PHP_EOL;
         echo ' Use this in conjunction with `quik version` to create a proper release.'.PHP_EOL;

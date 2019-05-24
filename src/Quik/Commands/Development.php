@@ -38,14 +38,14 @@ class Development extends \Quik\CommandAbstract
      * 
      * @var array
      */
-    public static $commands = ['dev', 'dev-build'];
+    public static $commands = ['dev', 'dev:build'];
     
     /**
      * Display the help information for this command
      */
     public function showUsage()
     {
-        echo 'Usage: quik dev [options]'.PHP_EOL;
+        echo 'Usage: '.\Quik\CommandAbstract::GREEN.'quik dev [options]'.\Quik\CommandAbstract::NC.PHP_EOL;
         echo PHP_EOL;
         echo 'Options:'.PHP_EOL;
         echo '  -h, --help          Show this message'.PHP_EOL;
@@ -60,7 +60,7 @@ class Development extends \Quik\CommandAbstract
      */
     public function execute()
     {
-        if ($this->getParameters()->getCalledCommand()=='dev-build') {
+        if ($this->getParameters()->getCalledCommand()=='dev:build') {
             $this->executeDevBuild();
             return;
         }

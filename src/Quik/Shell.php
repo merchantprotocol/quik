@@ -56,10 +56,11 @@ class Shell
      *
      * @param string   $command Command with optional argument markers '%s'
      * @param string[] $arguments Argument values to substitute markers with
+     * @param boolean  $passthru returns no output, but triggers some command that is interactive
      * @return stdClass
      * @throws Exception
      */
-    public function execute($command, $arguments = [])
+    public function execute($command, $arguments = [], $passthru = false)
     {
         $disabled = explode(',', str_replace(' ', ',', ini_get('disable_functions')));
         if (in_array('exec', $disabled)) {
@@ -68,9 +69,21 @@ class Shell
         }
         
         $command = $this->render($command, $arguments);
-        exec($command, $output, $exitCode);
-        $output = implode(PHP_EOL, $output);
-        
+        if ($passthru) {
+            $descriptorSpec = array(
+                0 => STDIN,
+                1 => STDOUT,
+                2 => STDERR,
+            );
+            $pipes = array();
+            $process = proc_open($command, $descriptorSpec, $pipes);
+            if (is_resource($process)) {
+                proc_close($process);
+            }
+        } else {
+            exec($command, $output, $exitCode);
+            $output = implode(PHP_EOL, $output);
+        }
         return $this->response($output, $exitCode, $command);
     }
     

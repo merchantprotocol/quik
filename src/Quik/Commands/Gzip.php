@@ -39,7 +39,7 @@ class Gzip extends \Quik\CommandAbstract
      */
     public function showUsage()
     {
-        echo ' Usage: quik gzip [options]'.PHP_EOL;
+        echo ' Usage: '.\Quik\CommandAbstract::GREEN.'quik gzip [options]'.\Quik\CommandAbstract::NC.PHP_EOL;
         echo ' Gzip is a great tool for sending files to a client that are compressed. This'.PHP_EOL;
         echo ' reduces the size of the file and the download time of your webpages. While'.PHP_EOL;
         echo ' Gzip is fast it will slow down your server when you\'re serving 100 files every'.PHP_EOL;
