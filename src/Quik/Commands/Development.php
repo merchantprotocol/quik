@@ -38,7 +38,14 @@ class Development extends \Quik\CommandAbstract
      *
      * @var array
      */
-    public static $commands = ['dev', 'dev:build'];
+    public static $commands = [
+        'dev', 
+        'dev:build',
+        'dev:tail',
+        'dev:gitignore:local',
+        'dev:gitignore',
+        'dev:set'
+    ];
     
     /**
      * Display the help information for this command
@@ -47,11 +54,17 @@ class Development extends \Quik\CommandAbstract
     {
         echo 'Usage: '.\Quik\CommandAbstract::GREEN.'quik dev [options]'.\Quik\CommandAbstract::NC.PHP_EOL;
         echo PHP_EOL;
+        echo ' Commands:'.PHP_EOL;
+        echo '  dev                 '.PHP_EOL;
+        echo '  dev:set             Set the mode to developer'.PHP_EOL;
+        echo '  dev:tail            tail -f var/log/*.log'.PHP_EOL;
+        echo '  dev:gitignore       Set the production level git ignore file. All generated code gets placed in the repo'.PHP_EOL;
+        echo '  dev:gitignore:local Set the local git ignore file. No generated code gets placed in the repo'.PHP_EOL;
+        echo '  dev:build           Compiles the code for a development server'.PHP_EOL;
+        echo PHP_EOL;
         echo 'Options:'.PHP_EOL;
         echo '  -h, --help          Show this message'.PHP_EOL;
-        echo '  -m, --mode          Place this project into developer mode.'.PHP_EOL;
-        echo '  -g, --gitignore     Deploy the server specific gitignore file for this project.'.PHP_EOL;
-        echo '  -t, --tail          Tail all of the error logs at once.'.PHP_EOL;
+        echo '  -y                  Preapprove the confirmation prompt.'.PHP_EOL;
         echo PHP_EOL;
     }
     
@@ -60,19 +73,7 @@ class Development extends \Quik\CommandAbstract
      */
     public function execute()
     {
-        if ($this->getParameters()->getCount() == 1) {
-            $this->showUsage();
-            exit(0);
-        }
-        if ($this->getMode()) {
-            $this->executeMode();
-        }
-        if ($this->getGitignore()) {
-            $this->executeGitignore();
-        }
-        if ($this->getTail()) {
-            $this->executeTail();
-        }
+        $this->showUsage();
     }
     
     /**
@@ -86,7 +87,7 @@ class Development extends \Quik\CommandAbstract
         if ($mode == 'productio') {
             if (!$this->confirm("The current mode is not set to developer. Would you like to update it?"))
             {
-                $this->echo("For production environments we suggest that you use `quik build`. Aborting...", SELF::YELLOW);
+                $this->echo("For production environments we suggest that you use `quik prod:build`. Aborting...", SELF::YELLOW);
                 exit(0);
             }
         }
@@ -142,9 +143,9 @@ class Development extends \Quik\CommandAbstract
     /**
      *
      */
-    public function executeMode()
+    public function executeSet()
     {
-        $response = $this->_shell->execute($this->getBinMagento()." deploy:mode:set developer");
+        $response = $this->_shell->execute($this->getBinMagento()." deploy:mode:set developer --skip-compilation");
         $this->echo($response->output);
         $this->run('clear -y');
     }
@@ -154,9 +155,23 @@ class Development extends \Quik\CommandAbstract
      */
     public function executeGitignore()
     {
+        $this->echo('Installing gitignore file at '.$this->getGitignorePath());
+        file_put_contents($this->getGitignorePath(), $this->getGitSource(), FILE_APPEND);
+        // test
+        $source = file_get_contents($this->getGitignorePath());
+        if (!strlen($source)) {
+            $this->echo('Could not write to the gitignore location...', SELF::YELLOW);
+        }
+    }
+    
+    /**
+     *
+     */
+    public function executeGitignoreLocal()
+    {
         if (file_exists(dirname($this->getExcludePath()))) {
             $this->echo('Installing local gitignore file at '.$this->getExcludePath());
-            file_put_contents($this->getExcludePath(), $this->getGitSource(), FILE_APPEND);
+            file_put_contents($this->getExcludePath(), $this->getExcludeSource(), FILE_APPEND);
             // test
             $source = file_get_contents($this->getExcludePath());
             if (!strlen($source)) {
@@ -166,22 +181,6 @@ class Development extends \Quik\CommandAbstract
             $this->echo('This does not seem to be a valid git repository:'.PHP_EOL
                 .$this->_app->getGitDir(), SELF::YELLOW);
         }
-    }
-    
-    
-    public function getExcludePath()
-    {
-        return $this->_app->getGitDir().DIRECTORY_SEPARATOR.'info'.DIRECTORY_SEPARATOR.'exclude';
-    }
-    
-    /**
-     * Return the contents of the development gitignore file
-     * @return string
-     */
-    public function getGitSource()
-    {
-        $filename = $this->_app->getQuikDir().DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'development_gitignore';
-        return file_get_contents($filename);
     }
     
     /**
@@ -210,29 +209,31 @@ class Development extends \Quik\CommandAbstract
     }
     
     /**
-     *
-     * @return boolean
+     * 
+     * @return string
      */
-    public function getMode()
+    public function getExcludePath()
     {
-        return $this->getParameters()->get('__development_m');
+        return $this->_app->getGitDir().DIRECTORY_SEPARATOR.'info'.DIRECTORY_SEPARATOR.'exclude';
     }
     
     /**
-     *
-     * @return boolean
+     * Return the contents of the development gitignore file
+     * @return string
      */
-    public function getGitignore()
+    public function getExcludeSource()
     {
-        return $this->getParameters()->get('__development_g');
+        $filename = $this->_app->getQuikDir().DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'development_gitignore';
+        return file_get_contents($filename);
     }
     
     /**
-     *
-     * @return boolean
+     * Return the contents of the development gitignore file
+     * @return string
      */
-    public function getTail()
+    public function getGitSource()
     {
-        return $this->getParameters()->get('__development_t');
+        $filename = $this->_app->getQuikDir().DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'production_gitignore';
+        return file_get_contents($filename);
     }
 }

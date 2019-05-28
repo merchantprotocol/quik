@@ -1,22 +1,21 @@
-#!/usr/bin/env php
 <?php
 /**
  * NOTICE OF LICENSE
  *
  * MIT License
- * 
+ *
  * Copyright (c) 2019 Merchant Protocol
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,42 +24,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * 
+ *
  * @category   merchantprotocol
  * @package    merchantprotocol/quik
  * @copyright  Copyright (c) 2019 Merchant Protocol, LLC (https://merchantprotocol.com/)
  * @license    MIT License
  */
+namespace Quik;
 
-$autoload = [
-    getcwd() . '/vendor/autoload.php',
-    __DIR__ . '/../vendor/autoload.php',
-    __DIR__ . '/../../vendor/autoload.php',
-    __DIR__ . '/../../../vendor/autoload.php'
-];
-
-$webroot = false;
-$loaded = false;
-$vendorDir = false;
-for ($i = 0; $i < count($autoload); $i++) {
-    if (file_exists($autoload[$i])) {
-        require $autoload[$i];
-        $vendorDir = dirname($autoload[$i]);
-        $loaded = true;
-        $webroot = dirname($vendorDir);
-        break;
+class Helper
+{
+    /**
+     * Polyfill for array_key_last() function added in PHP 7.3.
+     *
+     * Get the last key of the given array without affecting
+     * the internal array pointer.
+     *
+     * @param array $array An array
+     *
+     * @return mixed The last key of array if the array is not empty; NULL otherwise.
+     */
+    public static function array_key_last( $array ) {
+        $key = NULL;
+        
+        if ( is_array( $array ) ) {
+            
+            end( $array );
+            $key = key( $array );
+        }
+        
+        return $key;
     }
 }
-if (!$loaded) {
-    fwrite(
-        STDERR,
-        'Unable to determine install location. Please review our documentation @ https://app.gitbook.com/@merchant-protocol/s/merchantprotocol-quik/' . PHP_EOL
-    );
-    exit(1);
-}
-
-// Setup include path
-//set_include_path($includePath . PATH_SEPARATOR . get_include_path());
-
-new \Quik\Application($webroot);
-

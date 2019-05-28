@@ -41,12 +41,10 @@ class Parameters
     protected $_verbose = false;
     protected $_help = false;
     protected $_version = false;
+    protected $_directory = false;
     
     protected $_cert_csr = false;
     protected $__maintenance_off = false;
-    protected $__development_m = false;
-    protected $__development_g = false;
-    protected $__development_t = false;
     protected $__version_major = false;
     protected $__version_minor = false;
     protected $__version_patch = false;
@@ -101,16 +99,14 @@ class Parameters
                 } elseif ($arg == '--patch') {
                     $this->__version_patch = true;
                     
-                } elseif ($arg == '-m' || $arg == '--mode') {
-                    $this->__development_m = true;
-                } elseif ($arg == '-g' || $arg == '--gitignore') {
-                    $this->__development_g = true;
-                } elseif ($arg == '-t' || $arg == '--tail') {
-                    $this->__development_t = true;
                 } elseif ($arg == '-o' || $arg == '--off') {
                     $this->__maintenance_off = true;
                 } elseif ($arg == '--csr') {
                     $this->_cert_csr = true;
+                    
+                } elseif (strpos($arg, '--dir')!==false) {
+                    list($param, $value) = explode('=',$arg);
+                    $this->_directory = $value;
                     
                 } elseif (!$this->_command && $command = $this->in_array_r($arg, $commands)) {
                     $this->_command = $command;
@@ -161,6 +157,15 @@ class Parameters
     public function getHelp()
     {
         return $this->_help;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getDirectory()
+    {
+        return $this->_directory;
     }
     
     /**

@@ -111,12 +111,15 @@ class Application
     protected $_commandClass = null;
     
     /**
-     * @see https://devdocs.magento.com/guides/v2.3/howdoi/php/php_clear-dirs.html
+     * 
      */
-    public function __construct($webroot, $parameters)
+    public function __construct($webroot, $options = [])
     {
+        $this->_parameters = new \Quik\Parameters($options);
+        if ($changedDir = $this->_parameters->getDirectory()) {
+            $webroot = $changedDir;
+        }
         $this->_webroot = $webroot;
-        $this->_parameters = $parameters;
         $this->_commandClass = $this->getParameters()->getCommand();
         $command = $this->getParameters()->getCommand();
         
@@ -125,59 +128,61 @@ class Application
             echo 'Quik Version '.SELF::VERSION.' by Merchant Protocol'.PHP_EOL;
             exit(0);
         }
-        // Display help for command or more
-        if ($this->_parameters->getHelp()) {
+        // No command error
+        if (!$this->_commandClass || $this->_parameters->getHelp()) {
+            if ($this->_parameters->getCalledCommand()) {
+                $this->showError();
+            }
             if ($this->_commandClass && is_callable(array($this->getCommand(), 'showUsage'))) {
                 $this->getCommand()->showUsage();
             } else {
                 $this->showUsage();
-            }
-            exit(0);
-        }
-        // No command error
-        if (!$this->_commandClass) {
-            if ($this->_parameters->getCalledCommand()) {
-                $this->showError();
-            }
-            $this->showUsage();
-            $commands = $this->_parameters->getCommands();
-            foreach($commands as $class) {
-                $classname = '\Quik\Commands\\'.$class;
-                $_command = new $classname($this);
-                if (is_callable(array($_command, 'showUsage'))) {
-                    echo SELF::LB.\Quik\CommandAbstract::YELLOW." $class".\Quik\CommandAbstract::NC.SELF::LB;
-                    $_command->showUsage();
-                    
-                    echo \Quik\CommandAbstract::YELLOW.' More.. '.\Quik\CommandAbstract::NC;
-                    $handle = fopen ("php://stdin","r");
-                    $input = trim(fgets($handle));
-                    if ($input == 'q' || $input == 'c' || $input == 'w') {
-                        exit(0);
+                
+                $commandAbstract = new \Quik\CommandAbstract($this);
+                $commands = $this->_parameters->getCommands();
+                foreach($commands as $class) {
+                    $classname = '\Quik\Commands\\'.$class;
+                    $_command = new $classname($this);
+                    if (is_callable(array($_command, 'showUsage'))) {
+                        echo SELF::LB.\Quik\CommandAbstract::YELLOW." $class".\Quik\CommandAbstract::NC.SELF::LB;
+                        $_command->showUsage();
+                        
+                        
+                        $commandAbstract->echo(' More.. ',\Quik\CommandAbstract::YELLOW,false);
+                        if (!$commandAbstract->listen(['ENTER','down'],['q','c','w'])) {
+                            $commandAbstract->getShell()->clearTerminalLine();
+                            exit(0);
+                        }
+                        $commandAbstract->getShell()->clearTerminalLine();
+                        
                     }
-                    
+                }
+                echo SELF::LB." Command Prompt".SELF::LB;
+                
+                foreach($commands as $key => $class) {
+                    echo \Quik\CommandAbstract::YELLOW."    $key) $class".\Quik\CommandAbstract::NC.PHP_EOL;
+                }
+                echo PHP_EOL;
+                
+                echo \Quik\CommandAbstract::YELLOW.' Choose a command to run: '.\Quik\CommandAbstract::NC;
+                $handle = fopen ("php://stdin","r");
+                $input = trim(fgets($handle));
+                if (!strlen($input)) {
+                    exit(0);
+                }
+                if (isset($commands[$input])) {
+                    $command = $commands[$input];
+                } elseif (in_array($input, $commands)) {
+                    $command = $input;
+                } else {
+                    exit(0);
                 }
             }
-            echo SELF::LB." Command Prompt".SELF::LB;
-            
-            foreach($commands as $key => $class) {
-                echo \Quik\CommandAbstract::YELLOW."    $key) $class".\Quik\CommandAbstract::NC.PHP_EOL;
-            }
-            echo PHP_EOL;
-            
-            echo \Quik\CommandAbstract::YELLOW.' Choose a command to run: '.\Quik\CommandAbstract::NC;
-            $handle = fopen ("php://stdin","r");
-            $input = trim(fgets($handle));
-            if (!strlen($input)) {
-                exit(0);
-            }
-            if (isset($commands[$input])) {
-                $command = $commands[$input];
-            } elseif (in_array($input, $commands)) {
-                $command = $input;
-            } else {
-                exit(0);
-            }
         }
+        
+        $script = new \Quik\Commands\Script($this);
+        $script->saveHistory();
+        
         $this->run( $command );
     }
     

@@ -105,7 +105,11 @@ class CommandAbstract
     public function run($script = '')
     {
         $options = explode(' ', $script);
-        $app = new \Quik\Application($this->_app->getWebrootDir(), new \Quik\Parameters($options));
+        $webdir = $this->_app->getWebrootDir();
+        if ($changedDir = $this->getParameters()->getDirectory()) {
+            $webdir = $changedDir;
+        }
+        $app = new \Quik\Application($webdir, $options);
     }
     
     /**
@@ -164,6 +168,15 @@ class CommandAbstract
     }
     
     /**
+     * 
+     * @return \Quik\Shell
+     */
+    public function getShell()
+    {
+        return $this->_shell;
+    }
+    
+    /**
      *
      * @return string
      */
@@ -174,15 +187,19 @@ class CommandAbstract
     
     /**
      *
-     * @param string $message
-     * @param string $color
-     * @param boolean $linebreak
+     * @param string   $message
+     * @param string   $color
+     * @param boolean  $linebreak
+     * @param boolean  $cut
      * @return boolean
      */
-    public function echo($message, $color = SELF::NC, $linebreak = true)
+    public function echo($message, $color = SELF::NC, $linebreak = true, $cut = false)
     {
         if ($this->isQuiet()) {
             return false;
+        }
+        if ($cut) {
+            $message = substr($message, 0, $this->_shell->getMaxLength());
         }
         echo $color."$message".SELF::NC.($linebreak?"\n":'');
     }
@@ -249,6 +266,50 @@ class CommandAbstract
     }
     
     /**
+     * 
+     * @var array
+     */
+    protected $_keyMap = [
+        '65' => 'up',
+        '67' => 'right',
+        '66' => 'down',
+        '68' => 'left',
+        '113'=> 'q',
+        '115'=> 's',
+        '10' => 'ENTER',
+    ];
+    
+    /**
+     * 
+     * @param array $for
+     * @param array $quit
+     * @return array|string[]
+     */
+    public function listen( $for = [], $quit = ['q'] )
+    {
+        if (!is_array($quit)) {
+            $quit = [$quit];
+        }
+        readline_callback_handler_install('', function() { });
+        while (true) {
+            $r = array(STDIN);
+            $w = NULL;
+            $e = NULL;
+            $n = stream_select($r, $w, $e, null);
+            if ($n) {
+                $c = ord(stream_get_contents(STDIN, 1));
+                if ($c == 27 || $c == 91) continue;
+                if (isset($this->_keyMap[$c]) && in_array($this->_keyMap[$c], $quit)) {
+                    return false;
+                } elseif (isset($this->_keyMap[$c])) {
+                    return $this->_keyMap[$c];
+                }
+//                 echo "Char read: $c\n";
+            }
+        }
+    }
+    
+    /**
      *
      * @return string
      */
@@ -308,12 +369,6 @@ class CommandAbstract
     }
     
     /**
-     * Need to know how long the last status bar message was so that I can erase it.
-     * @var int
-     */
-    protected $_lastSize = 0;
-    
-    /**
      *
      * @param integer $done
      * @param integer $total
@@ -327,7 +382,6 @@ class CommandAbstract
         if($done > $total) return;
         
         if(empty($start_time)) {
-            $this->_lastSize = 0;
             $start_time=time();
         }
         $now = time();
@@ -358,13 +412,8 @@ class CommandAbstract
         
         $status_bar.= " ".number_format($elapsed)."s $msg";
         
-        echo chr(27)."[0G"; // return to first column on this line
-        while (strlen($status_bar) < $this->_lastSize)
-        {
-            $status_bar .= ' ';
-        }
-        $this->_lastSize = strlen($status_bar);
-        echo $status_bar;
+        $this->_shell->clearTerminalLine();
+        $this->echo($status_bar, SELF::NC, false, true);
         
         flush();
         

@@ -64,24 +64,13 @@ class Clear extends \Quik\CommandAbstract
             $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'pub/static/*',
         ];
         
-        $this->echo('Directories to be cleared:');
-        $this->echo('------------------------------------------------');
-        foreach ($dirs as $dir) {
-            $this->echo('|  '.$dir);
-        }
-        $this->echo('------------------------------------------------');
-        
-        // change directory to webroot
-        if (!$this->confirm("Shall we clear these directories?"))
-        {
-            $this->echo("ABORTING", SELF::YELLOW);
-            exit(0);
-        }
-        
         $command = $this->_shell->execute('rm -rf '.implode($dirs, ' '));
         $this->run("n -q cache:clean");
         $this->run("n -q cache:flush");
         
+        foreach ($dirs as $dir) {
+            $this->echo($dir);
+        }
         $this->echo("Successfully Cleared All tmp Directories!", SELF::GREEN);
     }
 }

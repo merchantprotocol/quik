@@ -14,12 +14,16 @@
 			"email" : "jonathon@merchantprotocol.com"
 		}
 	],
+	"version" : "0.0.6",
 	"minimum-stability" : "stable",
 	"require": {},
+        "suggest": {
+                 "erusev/parsedown" : "Add Documentation for your customer service reps"
+        },
 	"autoload" : {
-		"psr-0" : {
-			"Quik" : "src/"
-		}
+        "psr-0": {
+            "Quik": "src/"
+        }
 	},
     "bin": [
         "bin/quik"

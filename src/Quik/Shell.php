@@ -103,4 +103,25 @@ class Shell
         $std->escaped_command = $escaped_command;
         return $std;
     }
+    
+    /**
+     * 
+     * @return integer
+     */
+    public function getMaxLength()
+    {
+        $response = $this->execute('tput cols');
+        return $response->output;
+    }
+    
+    /**
+     * Resets the cursor to the first position on the line.
+     * 
+     */
+    public function clearTerminalLine()
+    {
+        echo chr(27)."[0G";
+        echo str_repeat(' ', $this->getMaxLength());
+        echo chr(27)."[0G";
+    }
 }
