@@ -182,7 +182,7 @@ class CommandAbstract
      */
     public function getBinMagento()
     {
-        return $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'bin/magento';
+        return $this->_app->getWebrootDir().'bin/magento';
     }
     
     /**

@@ -196,7 +196,7 @@ class Version extends \Quik\CommandAbstract
      */
     protected function _setVersionData()
     {
-        $filename = $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.SELF::VERSION_FILENAME;
+        $filename = $this->_app->getWebrootDir().SELF::VERSION_FILENAME;
         $data = json_encode($this->_data);
         return file_put_contents($filename, $data);
     }
@@ -208,7 +208,7 @@ class Version extends \Quik\CommandAbstract
     protected function _getVersionData()
     {
         if (empty($this->_data)) {
-            $filename = $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.SELF::VERSION_FILENAME;
+            $filename = $this->_app->getWebrootDir().SELF::VERSION_FILENAME;
             $contents = file_get_contents($filename);
             $contents = json_decode($contents, true);
             if (!$contents) {

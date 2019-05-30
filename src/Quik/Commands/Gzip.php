@@ -114,7 +114,7 @@ class Gzip extends \Quik\CommandAbstract
         
         // precompress all files in these directories
         foreach ($this->_dirs as $dir) {
-            $this->_shell->execute(SELF::GZIP_FILES, [$this->_app->getWebrootDir().DIRECTORY_SEPARATOR.$dir]);
+            $this->_shell->execute(SELF::GZIP_FILES, [$this->_app->getWebrootDir().$dir]);
         }
         
         $this->echo("All files have been precompressed with gzip!", SELF::GREEN);

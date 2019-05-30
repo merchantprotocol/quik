@@ -127,7 +127,7 @@ class Production extends \Quik\CommandAbstract
         $this->run("n -q config:store:set dev/css/merge_css_files 1");
         $this->run("n -q config:store:set dev/css/minify_files 1");
         $this->run("n -q config:store:set dev/js/merge_files 1");
-        $this->run("n -q config:store:set dev/js/enable_js_bundling 1");
+        $this->run("n -q config:store:set dev/js/enable_js_bundling 0");
         $this->run("n -q config:store:set dev/js/minify_files 1");
         
         $this->show_status(45,100, 'Running setup:upgrade');

@@ -48,6 +48,7 @@ class Parameters
     protected $__version_major = false;
     protected $__version_minor = false;
     protected $__version_patch = false;
+    protected $__deploy_dir = false;
     
     protected $_called = null;
     protected $_subcall = 'execute';
@@ -107,10 +108,13 @@ class Parameters
                 } elseif (strpos($arg, '--dir')!==false) {
                     list($param, $value) = explode('=',$arg);
                     $this->_directory = $value;
+                } elseif (strpos($arg, '--deploy-dir')!==false) {
+                    list($param, $value) = explode('=',$arg);
+                    $this->__deploy_dir = $value;
                     
-                } elseif (!$this->_command && $command = $this->in_array_r($arg, $commands)) {
+                } elseif (!$this->_command && $command = $this->in_array_r(strtolower($arg), $commands)) {
                     $this->_command = $command;
-                    $this->_called = $arg;
+                    $this->_called = strtolower($arg);
                     if (strpos($arg,":")!==false) {
                         $_parts = explode(':',$arg);
                         foreach($_parts as $_key => $_part) {
@@ -166,6 +170,15 @@ class Parameters
     public function getDirectory()
     {
         return $this->_directory;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getDeployDir()
+    {
+        return $this->__deploy_dir;
     }
     
     /**

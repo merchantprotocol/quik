@@ -68,21 +68,31 @@ class Permissions extends \Quik\CommandAbstract
         $response = $this->_shell->execute("cd %s", [$this->_app->getWebrootDir()]);
         
         $this->echo('Resetting all files to 664 and directories to 775', SELF::GREEN);
-        $response = $this->_shell->execute('find . -type f -not -perm 664 -exec chmod 664 {} \;');
-        $response = $this->_shell->execute('find . -type d -not -perm 775 -exec chmod 775 {} \;');
+        $response = $this->_shell->execute('find %s -type f -not -perm 664 -exec chmod 664 {} \;',[$this->_app->getWebrootDir()]);
+        $response = $this->_shell->execute('find %s -type d -not -perm 775 -exec chmod 775 {} \;', [$this->_app->getWebrootDir()]);
         
         $this->echo('Updating required writable files and directories', SELF::GREEN);
-        $response = $this->_shell->execute('find var generated vendor pub/static pub/media app/etc -type f -exec chmod g+w {} +');
-        $response = $this->_shell->execute('find var generated vendor pub/static pub/media app/etc -type d -exec chmod g+ws {} +');
+        
+        $response = $this->_shell->execute("find {$this->_app->getWebrootDir()}var {$this->_app->getWebrootDir()}generated "
+        ."{$this->_app->getWebrootDir()}vendor {$this->_app->getWebrootDir()}pub/static {$this->_app->getWebrootDir()}pub/media "
+        ."{$this->_app->getWebrootDir()}app/etc -type f -exec chmod g+w {} +");
+        
+        $response = $this->_shell->execute("find {$this->_app->getWebrootDir()}var {$this->_app->getWebrootDir()}generated "
+        ."{$this->_app->getWebrootDir()}vendor {$this->_app->getWebrootDir()}pub/static {$this->_app->getWebrootDir()}pub/media "
+        ."{$this->_app->getWebrootDir()}app/etc -type d -exec chmod g+ws {} +");
         
         $this->echo('Updating specific files', SELF::GREEN);
-        $response = $this->_shell->execute('mkdir pub/static');
-        $response = $this->_shell->execute('chmod 775 pub/static');
-        $response = $this->_shell->execute('chmod 664 ./app/etc/*.xml');
-        $response = $this->_shell->execute('chmod u+x bin/magento');
-        $response = $this->_shell->execute('chmod u+x vendor/bin/quik');
+        $response = $this->_shell->execute("mkdir {$this->_app->getWebrootDir()}pub/static");
+        $response = $this->_shell->execute("chmod 775 {$this->_app->getWebrootDir()}pub/static");
+        $response = $this->_shell->execute("chmod 664 {$this->_app->getWebrootDir()}app/etc/*.xml");
+        $response = $this->_shell->execute("chmod u+x {$this->_app->getWebrootDir()}bin/magento");
+        $response = $this->_shell->execute("chmod u+x {$this->_app->getWebrootDir()}vendor/bin/quik");
 
-        $response = $this->_shell->execute('find . -not -user %s -execdir chown %s:%s {} \+', [$this->getUser(),$this->getUser(),$this->getGroup()]);
+        $response = $this->_shell->execute('find %s -not -user %s -execdir chown %s:%s {} \+', 
+            [$this->_app->getWebrootDir(),$this->getUser(),$this->getUser(),$this->getGroup()]);
+        $response = $this->_shell->execute('find %s -not -group %s -execdir chgrp %s {} \+', 
+            [$this->_app->getWebrootDir(),$this->getGroup(),$this->getGroup()]);
+        
         $this->echo('Permissions Updated Successfully!', SELF::GREEN);
     }
 }

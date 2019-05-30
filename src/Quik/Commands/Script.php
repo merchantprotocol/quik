@@ -72,7 +72,7 @@ class Script extends \Quik\CommandAbstract
      * Location where scripts are stored
      * @var string
      */
-    CONST SCRIPT_DIR = '/patches/vendor/merchantprotocol/quik/';
+    CONST SCRIPT_DIR = 'patches/vendor/merchantprotocol/quik/';
     
     /**
      * Working scriptfile name
@@ -228,7 +228,7 @@ class Script extends \Quik\CommandAbstract
      */
     protected function _getHistoryFilePath()
     {
-        return $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.SELF::HISTORY_SCRIPTNAME;
+        return $this->_app->getWebrootDir().'var'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.SELF::HISTORY_SCRIPTNAME;
     }
     
     /**

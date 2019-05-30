@@ -78,6 +78,8 @@ class Application
         echo '  -y              Automatically confirm all prompts'.PHP_EOL;
         echo PHP_EOL;
         echo PHP_EOL;
+        $commandAbstract = new \Quik\CommandAbstract($this);
+        $commandAbstract->showInfo();
     }
     
     /**
@@ -147,23 +149,19 @@ class Application
                         echo SELF::LB.\Quik\CommandAbstract::YELLOW." $class".\Quik\CommandAbstract::NC.SELF::LB;
                         $_command->showUsage();
                         
-                        
                         $commandAbstract->echo(' More.. ',\Quik\CommandAbstract::YELLOW,false);
                         if (!$commandAbstract->listen(['ENTER','down'],['q','c','w'])) {
                             $commandAbstract->getShell()->clearTerminalLine();
                             exit(0);
                         }
                         $commandAbstract->getShell()->clearTerminalLine();
-                        
                     }
                 }
                 echo SELF::LB." Command Prompt".SELF::LB;
-                
                 foreach($commands as $key => $class) {
                     echo \Quik\CommandAbstract::YELLOW."    $key) $class".\Quik\CommandAbstract::NC.PHP_EOL;
                 }
                 echo PHP_EOL;
-                
                 echo \Quik\CommandAbstract::YELLOW.' Choose a command to run: '.\Quik\CommandAbstract::NC;
                 $handle = fopen ("php://stdin","r");
                 $input = trim(fgets($handle));
@@ -216,7 +214,7 @@ class Application
      */
     public function getWebrootDir()
     {
-        return $this->_webroot;
+        return rtrim($this->_webroot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
     }
     
     /**
@@ -243,7 +241,7 @@ class Application
      */
     public function getGitDir()
     {
-        return $this->getWebrootDir().DIRECTORY_SEPARATOR.'.git';
+        return $this->getWebrootDir().'.git';
     }
     
     /**

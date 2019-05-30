@@ -74,7 +74,7 @@ class Changelog extends \Quik\CommandAbstract
         }
         
         $this->show_status(10,100);
-        $filename = $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.SELF::CHANGLOG_FILENAME;
+        $filename = $this->_app->getWebrootDir().SELF::CHANGLOG_FILENAME;
         
         // building the changlog text
         $changlog = 'DEVELOPMENT'.PHP_EOL.'============='.PHP_EOL;

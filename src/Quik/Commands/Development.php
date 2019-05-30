@@ -112,9 +112,6 @@ class Development extends \Quik\CommandAbstract
             $this->_shell->execute($this->getBinMagento().' deploy:mode:set developer');
         }
         
-        $this->show_status(5,100, 'Updating Permissions');
-        $this->run("permissions -y -q $userGroup");
-        
         $this->show_status(25,100, 'Clearing Directories');
         $this->run("clear -y -q");
         
@@ -134,6 +131,7 @@ class Development extends \Quik\CommandAbstract
         
         $this->show_status(60,100, 'Running setup:upgrade');
         $response = $this->_shell->execute($this->getBinMagento().' setup:upgrade');
+        $response = $this->_shell->execute($this->getBinMagento().' setup:static-content:deploy');
         
         $this->show_status(80,100, 'Updating Permissions');
         $this->run("permissions -y -q $userGroup");
@@ -189,7 +187,7 @@ class Development extends \Quik\CommandAbstract
     public function executeTail()
     {
         $patterns = [
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.'*.log'
+            $this->_app->getWebrootDir().'var'.DIRECTORY_SEPARATOR.'log'.DIRECTORY_SEPARATOR.'*.log'
         ];
         $files = [];
         foreach ($patterns as $pattern) {

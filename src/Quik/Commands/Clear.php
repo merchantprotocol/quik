@@ -55,13 +55,13 @@ class Clear extends \Quik\CommandAbstract
     public function execute()
     {
         $dirs = [
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/page_cache/*',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/cache/*',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/composer_home/*',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'var/view_preprocessed/*',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'generated/code/*',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'generated/metadata/*',
-            $this->_app->getWebrootDir().DIRECTORY_SEPARATOR.'pub/static/*',
+            $this->_app->getWebrootDir().'var/page_cache/*',
+            $this->_app->getWebrootDir().'var/cache/*',
+            $this->_app->getWebrootDir().'var/composer_home/*',
+            $this->_app->getWebrootDir().'var/view_preprocessed/*',
+            $this->_app->getWebrootDir().'generated/code/*',
+            $this->_app->getWebrootDir().'generated/metadata/*',
+            $this->_app->getWebrootDir().'pub/static/*',
         ];
         
         $command = $this->_shell->execute('rm -rf '.implode($dirs, ' '));
