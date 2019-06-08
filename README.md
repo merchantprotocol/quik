@@ -24,9 +24,12 @@ We have packaged this script to work with composer. Run the following command wh
 
 ### Review our Documentation
 
-[Quik Magento 2 Command Documentation](https://merchant-protocol.gitbook.io/merchantprotocol-quik/)
+[Quik Magento 2 Command Documentation](https://merchantprotocol.github.io/quik/#/)
 
 
 Resources
 --
 * [Packagist](https://packagist.org/packages/merchantprotocol/quik)
+* [Documentation](https://merchantprotocol.github.io/quik/#/)
+* [Repository](https://github.com/merchantprotocol/docs/)
+* [Code Owners](https://merchantprotocol.com)

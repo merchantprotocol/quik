@@ -1,3 +1,10 @@
+Getting Started
+--
+
+Quik is designed to shorthand typical Magento operations so that you don't have to remember everything.  Built by Merchant Protocol​
+
+With Quik all of your complicated commands are stored safe into short Quik commands. Need to reset your stores file permissions? quik permi, done. We've optimized each of our commands to run as fast as possible on stores with millions of files. Not only are they shorthand, they're quick!
+
 ```
                             __  __               _                 _
              ZZZZZ         |  \/  |             | |               | |
@@ -34,14 +41,6 @@ Parameters used in this command:
 |  Path to bin/magento:   /home/anonymous/Documents/Sites/merchantprotocol/quik/bin/magento
 ------------------------------------------------
 ```
-
-
-Getting Started
---
-
-Quik is designed to shorthand typical Magento operations so that you don't have to remember everything.  Built by Merchant Protocol​
-
-With Quik all of your complicated commands are stored safe into short Quik commands. Need to reset your stores file permissions? quik permi, done. We've optimized each of our commands to run as fast as possible on stores with millions of files. Not only are they shorthand, they're quick!
 
 ## Installation via Composer
 
