@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!-- 
+/**
+ * NOTICE OF LICENSE
+ *
+ * MIT License
+ * 
+ * Copyright (c) 2019 Merchant Protocol
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * 
+ * @category   merchantprotocol
+ * @package    merchantprotocol/
+ * @copyright  Copyright (c) 2019 Merchant Protocol, LLC (https://merchantprotocol.com/)
+ * @license    MIT License
+ */
+ 
+ @see https://docsify.js.org/#/
+ -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Documentation - Magento 2 Docs - Merchant Protocol</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
+</head>
+<body>
+<!--   <nav> -->
+<!--     <a href="#/">EN</a> -->
+<!--   </nav> -->
+  <div id="app">Loading ...</div>
+  <script>
+    window.$docsify = {
+      name: 'Documentation - Magento 2 Docs - Merchant Protocol',
+      repo: 'https://github.com/merchantprotocol/docs/',
+      loadSidebar: true,
+      loadNavbar: true,
+      coverpage: true,
+      search: {
+          noData: {
+            '/': 'No results!'
+          },
+          paths: 'auto',
+          placeholder: {
+            '/': 'Search'
+          }
+      },
+
+      plugins: [
+        function (hook, vm) {
+          hook.beforeEach(function (html) {
+            if (/githubusercontent\.com/.test(vm.route.file)) {
+              url = vm.route.file
+                .replace('raw.githubusercontent.com', 'github.com')
+                .replace(/\/master/, '/blob/master')
+            } else {
+              url = 'https://github.com/merchantprotocol/docs/tree/master/docs/' + vm.route.file
+            }
+            var editHtml = '[:memo: Edit Document](' + url + ')\n'
+            return editHtml
+              + html
+          })
+        }
+      ]
+    }
+  </script>
+  <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
+  <script src="//unpkg.com/docsify/lib/plugins/search.min.js"></script>
+</body>
+</html>

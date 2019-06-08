@@ -120,7 +120,9 @@ class Deploy extends \Quik\CommandAbstract
     public function __construct($app)
     {
         parent::__construct($app);
-        $this->_loadReleasesJsonData();
+        if ($this->getParameters()->getCalledCommand()) {
+            $this->_loadReleasesJsonData();
+        }
     }
     
     /**
