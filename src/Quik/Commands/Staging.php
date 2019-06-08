@@ -35,10 +35,50 @@ namespace Quik\Commands;
 class Staging extends \Quik\CommandAbstract
 {
     /**
+     *
+     * @var array
+     */
+    public static $commands = [
+        'staging',
+        'staging:tag'
+    ];
+    
+    /**
+     * Display the help information for this command
+     */
+    public function showUsage()
+    {
+        echo ' Usage: '.\Quik\CommandAbstract::GREEN.'quik staging [options]'.\Quik\CommandAbstract::NC.PHP_EOL;
+        echo ' After testing has completed on the staging server then we\'ll prepare the codebase for release.'.PHP_EOL;
+        echo '   1. The changelog will be updated.'.PHP_EOL;
+        echo '   2. The version number will be updated in the codebase.'.PHP_EOL;
+        echo '   3. Git commit changes'.PHP_EOL;
+        echo '   4. Git TAG codebase'.PHP_EOL;
+        echo PHP_EOL;
+        echo ' Commands:'.PHP_EOL;
+        echo '  staging                Show help'.PHP_EOL;
+        echo '  staging:tag <tag>      Creates a clone in a sister directory to this repository. Only <tag> is required'.PHP_EOL;
+        echo PHP_EOL;
+        echo ' Options:'.PHP_EOL;
+        echo '  -h, --help             Show this message'.PHP_EOL;
+        echo '  -y                     Preapprove the confirmation prompt.'.PHP_EOL;
+        echo PHP_EOL;
+    }
+    
+    /**
      * Build Magento
      */
     public function execute()
     {
+        $this->showUsage();
+    }
+    
+    /**
+     * 
+     */
+    public function executeTag()
+    {
+        $this->run("changelog -y");
         
     }
 }

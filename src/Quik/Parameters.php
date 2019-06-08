@@ -49,6 +49,7 @@ class Parameters
     protected $__version_minor = false;
     protected $__version_patch = false;
     protected $__deploy_dir = false;
+    protected $__dev_full = false;
     
     protected $_called = null;
     protected $_subcall = 'execute';
@@ -92,6 +93,9 @@ class Parameters
                     $this->_quiet = true;
                 } elseif ($arg == '-v' || $arg == '--verbose') {
                     $this->_verbose = true;
+                    
+                } elseif ($arg == '--full') {
+                    $this->__dev_full = true;
                     
                 } elseif ($arg == '--major') {
                     $this->__version_major = true;
@@ -161,6 +165,15 @@ class Parameters
     public function getHelp()
     {
         return $this->_help;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getFull()
+    {
+        return $this->__dev_full;
     }
     
     /**

@@ -58,40 +58,74 @@ class Changelog extends \Quik\CommandAbstract
      */
     CONST CHANGLOG_FILENAME = 'CHANGELOG.md';
     
+    CONST UNDERLINE = '=============';
+    
+    CONST DEVELOPMENT = 'DEVELOPMENT';
+    
     /**
      * Build Magento
      */
     public function execute()
     {
+        $this->show_status(10,100, 'Removing old tmp changelog');
+        
         // Check that the working directory is clean
         $this->_shell->execute("cd ".$this->_app->getWebrootDir());
-        $status = $this->_shell->execute("git status");
-        if (strpos($status->output, 'nothing to commit, working tree clean') === false) {
-            if (!$this->confirm("Your working directory has unresolved changes. Do you want to continue?")) {
-                $this->echo('Aborting...', SELF::RED);
-                exit(0);
-            }
-        }
-        
-        $this->show_status(10,100);
-        $filename = $this->_app->getWebrootDir().SELF::CHANGLOG_FILENAME;
         
         // building the changlog text
-        $changlog = 'DEVELOPMENT'.PHP_EOL.'============='.PHP_EOL;
+        $this->show_status(20,100, 'Building Commit log');
+        $changlog = SELF::DEVELOPMENT.PHP_EOL.SELF::UNDERLINE.PHP_EOL;
         $changlog .= $this->getFormattedCommits();
-        $this->show_status(40,100);
-        $changlog .= file_get_contents($filename);
-        $this->show_status(80,100);
+        
+        $this->show_status(40,100, 'Concatenate with existing changelog');
+        $releases = $this->_parseChangelog();
+        $str = '';
+        foreach ($releases as $tag => $changes) {
+            if ($tag==SELF::DEVELOPMENT) {
+                continue;
+            }
+            $str .= PHP_EOL.$tag.PHP_EOL;
+            $str .= implodE(PHP_EOL, $changes);
+        }
+        $changlog .= $str;
         
         // update the changelog
-        file_put_contents( $filename, $changlog );
+        $this->show_status(80,100, 'Saving changelog');
+        file_put_contents( $this->_getChangelogPath(), $changlog );
         $this->show_status(100,100);
         $this->echo('Changlog has been updated!', SELF::GREEN);
     }
     
     /**
+     * Parse the changelog and return it as a multideminsional array
+     */
+    protected function _parseChangelog()
+    {
+        $raw = file_get_contents($this->_getChangelogPath());
+        $split = explode(PHP_EOL, $raw);
+        $logString = array_reverse($split);
+        
+        $releases = [];
+        $previousLine = '';
+        foreach($logString as $line) {
+            // save the new release into the array and continue
+            if (strpos($previousLine, SELF::UNDERLINE)!==false) {
+                $releases[$line] = array_reverse($release);
+                $release = [];
+                $previousLine = '';
+                continue;
+            }
+            
+            // save every line
+            $release[] = $line;
+            $previousLine = $line;
+        }
+        return array_reverse($releases);
+    }
+    
+    /**
      * 
-     * @return \Quik\Commands\unknown
+     * @return string
      */
     public function getFormattedCommits()
     {
@@ -166,8 +200,8 @@ class Changelog extends \Quik\CommandAbstract
     
     /**
      *
-     * @param unknown $logArray
-     * @return unknown
+     * @param string $logArray
+     * @return string
      */
     protected function _formatLog( $logArray )
     {
@@ -176,5 +210,14 @@ class Changelog extends \Quik\CommandAbstract
             $log .= '    * '.$commit['message'].PHP_EOL;
         }
         return $log.PHP_EOL;
+    }
+    
+    /**
+     *
+     * @return string
+     */
+    protected function _getChangelogPath()
+    {
+        return $this->_app->getWebrootDir().SELF::CHANGLOG_FILENAME;
     }
 }

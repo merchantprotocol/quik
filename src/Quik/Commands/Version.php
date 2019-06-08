@@ -32,27 +32,42 @@
  */
 namespace Quik\Commands;
 
+use Quik\CommandAbstract;
+
 class Version extends \Quik\CommandAbstract
 {
+    /**
+     *
+     * @var array
+     */
+    public static $commands = [
+        'vers',
+        'vers:major',
+        'vers:minor',
+        'vers:patch'
+    ];
+    
     /**
      * Display the help information for this command
      */
     public function showUsage()
     {
-        echo 'Usage: '.\Quik\CommandAbstract::GREEN.'quik version [options] <new.value>'.\Quik\CommandAbstract::NC.PHP_EOL;
+        echo 'Usage: '.\Quik\CommandAbstract::GREEN.'quik vers [options] <new.value>'.\Quik\CommandAbstract::NC.PHP_EOL;
+        echo PHP_EOL;
+        echo ' Commands:'.PHP_EOL;
+        echo '  vers:major         Increases the major, resets minor and patch to 0'.PHP_EOL;
+        echo '  vers:minor         Ignores major, increases minor, resets patch to 0'.PHP_EOL;
+        echo '  vers:patch         Ignores major and minor, increases patch by one'.PHP_EOL;
         echo PHP_EOL;
         echo 'Options:'.PHP_EOL;
         echo '  -h, --help        Show this message'.PHP_EOL;
         echo '  Just use one of the following options and the version will be automatically increased.'.PHP_EOL;
-        echo '  --major      Increases the major, resets minor and patch to 0'.PHP_EOL;
-        echo '  --minor      Ignores major, increases minor, resets patch to 0'.PHP_EOL;
-        echo '  --patch      Ignores major and minor, increases patch by one'.PHP_EOL;
         echo PHP_EOL;
         echo 'If you enter a number after an option it will override the existing number, leaving other sections untouched.'.PHP_EOL;
-        echo 'If current version is 1.1.1 and you enter `quik version --minor` the new version will be 1.2.0.'.PHP_EOL;
-        echo 'If current version is 1.1.1 and you enter `quik version --minor 4` the new version will be 1.4.1.'.PHP_EOL;
+        echo 'If current version is 1.1.1 and you enter `quik vers:minor` the new version will be 1.2.0.'.PHP_EOL;
+        echo 'If current version is 1.1.1 and you enter `quik vers:minor 4` the new version will be 1.4.1.'.PHP_EOL;
         echo 'Ignore the options and just enter a new version number as major.minor.patch (e.g. 0.0.1)'.PHP_EOL;
-        echo 'If current version is 1.1.1 and you enter `quik version 1.2.3` the new version will be 1.2.3.'.PHP_EOL;
+        echo 'If current version is 1.1.1 and you enter `quik vers 1.2.3` the new version will be 1.2.3.'.PHP_EOL;
         echo PHP_EOL;
     }
     
@@ -79,22 +94,21 @@ class Version extends \Quik\CommandAbstract
     protected $_data = [];
     
     /**
-     * @see https://devdocs.magento.com/guides/v2.3/howdoi/php/php_clear-dirs.html
+     * 
+     * @param \Quik\Application $app
+     */
+    public function __construct($app)
+    {
+        parent::__construct($app);
+        $this->_getVersionData();
+    }
+    
+    /**
+     * 
      */
     public function execute()
     {
-        $this->_getVersionData();
-        
-        if ($this->getParameters()->get('__version_major')) {
-            $this->uptick('major', $this->getValue());
-            
-        } elseif ($this->getParameters()->get('__version_minor')) {
-            $this->uptick('minor', $this->getValue());
-            
-        } elseif ($this->getParameters()->get('__version_patch')) {
-            $this->uptick('patch', $this->getValue());
-            
-        } elseif ($this->getValue()) {
+        if ($this->getValue()) {
             list($major,$minor,$patch) = explode('.', $this->getValue());
             $this->setVersion($major,$minor,$patch);
         } else {
@@ -102,6 +116,36 @@ class Version extends \Quik\CommandAbstract
             exit(0);
         }
         
+        $this->_setVersionData();
+        $this->echo("The new version is ".$this->getVersion(), SELF::GREEN);
+    }
+    
+    /**
+     *
+     */
+    public function executeMajor()
+    {
+        $this->uptick('major', $this->getValue());
+        $this->_setVersionData();
+        $this->echo("The new version is ".$this->getVersion(), SELF::GREEN);
+    }
+    
+    /**
+     *
+     */
+    public function executeMinor()
+    {
+        $this->uptick('minor', $this->getValue());
+        $this->_setVersionData();
+        $this->echo("The new version is ".$this->getVersion(), SELF::GREEN);
+    }
+    
+    /**
+     *
+     */
+    public function executePatch()
+    {
+        $this->uptick('patch', $this->getValue());
         $this->_setVersionData();
         $this->echo("The new version is ".$this->getVersion(), SELF::GREEN);
     }
@@ -196,9 +240,18 @@ class Version extends \Quik\CommandAbstract
      */
     protected function _setVersionData()
     {
+        // update json
         $filename = $this->_app->getWebrootDir().SELF::VERSION_FILENAME;
         $data = json_encode($this->_data);
-        return file_put_contents($filename, $data);
+        if (!file_put_contents($filename, $data)) {
+            $this->echo('Could not update '.SELF::VERSION_FILENAME, SELF::RED);
+        }
+        // update static
+        $filestatic = $this->_app->getWebrootDir().'pub'.DIRECTORY_SEPARATOR.'status.html';
+        $data = $this->getVersion();
+        if (!file_put_contents($filestatic, $data)) {
+            $this->echo('Could not update pub/status.html', SELF::RED);
+        }
     }
     
     /**

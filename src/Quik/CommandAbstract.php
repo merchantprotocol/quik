@@ -59,6 +59,12 @@ class CommandAbstract
     CONST NC       = "\033[0m";
     
     /**
+     *
+     * @var string
+     */
+    CONST RELEASES_JSON = 'releases.json';
+    
+    /**
      * List of commands that can activate this class
      * @var array
      */
@@ -195,13 +201,18 @@ class CommandAbstract
      */
     public function echo($message, $color = SELF::NC, $linebreak = true, $cut = false)
     {
+        $wascut = false;
         if ($this->isQuiet()) {
             return false;
         }
         if ($cut) {
-            $message = substr($message, 0, $this->_shell->getMaxLength());
+            $_message = substr($message, 0, $this->_shell->getMaxLength());
+            if (strlen($_message)<strlen($message)) {
+                $wascut = true;
+            }
+            $message = $_message;
         }
-        echo $color."$message".SELF::NC.($linebreak?"\n":'');
+        echo $color."$message".($wascut?'...':'').SELF::NC.($linebreak?"\n":'');
     }
     
     /**
@@ -421,5 +432,34 @@ class CommandAbstract
         if($done == $total) {
             echo "\n";
         }
+    }
+    
+    /**
+     *
+     * @return string
+     */
+    protected function _getBaseDir()
+    {
+        if (is_null($this->_base_dir)) {
+            if ($this->getParameters()->getDeployDir()) {
+                $this->_base_dir = rtrim($this->getParameters()->getDeployDir(), '/').DIRECTORY_SEPARATOR;
+            } else {
+                
+                $test = dirname($this->_app->getWebrootDir()).DIRECTORY_SEPARATOR.SELF::RELEASES_JSON;
+                $test2 = dirname(dirname($this->_app->getWebrootDir())).DIRECTORY_SEPARATOR.SELF::RELEASES_JSON;
+                $test3 = dirname(dirname(dirname($this->_app->getWebrootDir()))).DIRECTORY_SEPARATOR.SELF::RELEASES_JSON;
+                if (file_exists($test)) {
+                    $this->_base_dir = dirname($test).DIRECTORY_SEPARATOR;
+                } elseif (file_exists($test2)) {
+                    $this->_base_dir = dirname($test2).DIRECTORY_SEPARATOR;
+                } elseif (file_exists($test3)) {
+                    $this->_base_dir = dirname($test3).DIRECTORY_SEPARATOR;
+                } else{
+                    $this->echo('Please specify a deploy directory with --deploy-dir', SELF::YELLOW);
+                    exit(0);
+                }
+            }
+        }
+        return $this->_base_dir;
     }
 }

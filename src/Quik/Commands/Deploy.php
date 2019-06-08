@@ -102,12 +102,6 @@ class Deploy extends \Quik\CommandAbstract
     CONST RELEASES_DIR = 'releases'.DIRECTORY_SEPARATOR;
     
     /**
-     *
-     * @var string
-     */
-    CONST RELEASES_JSON = 'releases.json';
-    
-    /**
      * Common used line break
      * @var string
      */
@@ -303,7 +297,8 @@ class Deploy extends \Quik\CommandAbstract
         if (strpos($response->output, 'fatal: /usr/lib/git-core/git-submodule')!==false) {
             $this->_shell->execute("cd $sistDir && git submodule update --init --recursive",[],true);
         }
-
+        
+        $this->run("media --dir=$sistDir -y");
         $this->run("prod:build --dir=$sistDir -y");
     }
     
@@ -367,29 +362,6 @@ class Deploy extends \Quik\CommandAbstract
     protected function _getTags()
     {
         return array_column($this->_releases_json, 'tag');
-    }
-    
-    /**
-     *
-     * @return string
-     */
-    protected function _getBaseDir()
-    {
-        if (is_null($this->_base_dir)) {
-            if ($this->getParameters()->getDeployDir()) {
-                $this->_base_dir = rtrim($this->getParameters()->getDeployDir(), '/').DIRECTORY_SEPARATOR;
-            } else {
-                
-                $test = dirname(dirname($this->_app->getWebrootDir())).DIRECTORY_SEPARATOR.SELF::RELEASES_JSON;
-                if (file_exists($test)) {
-                    $this->_base_dir = dirname($test).DIRECTORY_SEPARATOR;
-                } else {
-                    $this->echo('Please specify a deploy directory with --deploy-dir', SELF::YELLOW);
-                    exit(0);
-                }
-            }
-        }
-        return $this->_base_dir;
     }
     
     /**

@@ -42,7 +42,7 @@ class Development extends \Quik\CommandAbstract
         'dev', 
         'dev:build',
         'dev:tail',
-        'dev:gitignore:local',
+        'dev:gitignore:min',
         'dev:gitignore',
         'dev:set'
     ];
@@ -58,8 +58,8 @@ class Development extends \Quik\CommandAbstract
         echo '  dev                 '.PHP_EOL;
         echo '  dev:set             Set the mode to developer'.PHP_EOL;
         echo '  dev:tail            tail -f var/log/*.log'.PHP_EOL;
-        echo '  dev:gitignore       Set the production level git ignore file. All generated code gets placed in the repo'.PHP_EOL;
-        echo '  dev:gitignore:local Set the local git ignore file. No generated code gets placed in the repo'.PHP_EOL;
+        echo '  dev:gitignore       no vendor, no generated, no media, no static'.PHP_EOL;
+        echo '  dev:gitignore:min   All generated code gets placed in the repository'.PHP_EOL;
         echo '  dev:build           Compiles the code for a development server'.PHP_EOL;
         echo PHP_EOL;
         echo 'Options:'.PHP_EOL;
@@ -115,26 +115,32 @@ class Development extends \Quik\CommandAbstract
         $this->show_status(25,100, 'Clearing Directories');
         $this->run("clear -y -q");
         
-        $this->show_status(35,100, 'Running Composer');
-        $this->_shell->execute("composer install");
-        $this->_shell->execute("composer update");
+        if ($this->getParameters()->getFull()) {
+            $this->show_status(35,100, 'Running Composer');
+            $this->_shell->execute("composer install");
+            $this->_shell->execute("composer update");
+        }
         
-        $this->show_status(45,100, 'Inporting Configuration');
+        $this->show_status(45,100, 'Importing Configuration');
         $response = $this->_shell->execute($this->getBinMagento().' app:config:import');
         
-        $this->show_status(50,100, "Disabling Merged Assets");
-        $this->run("n -q config:store:set dev/css/merge_css_files 0");
-        $this->run("n -q config:store:set dev/css/minify_files 0");
-        $this->run("n -q config:store:set dev/js/merge_files 0");
-        $this->run("n -q config:store:set dev/js/enable_js_bundling 0");
-        $this->run("n -q config:store:set dev/js/minify_files 0");
+        if ($this->getParameters()->getFull()) {
+            $this->show_status(50,100, "Disabling Merged Assets");
+            $this->run("n -q config:store:set dev/css/merge_css_files 0");
+            $this->run("n -q config:store:set dev/css/minify_files 0");
+            $this->run("n -q config:store:set dev/js/merge_files 0");
+            $this->run("n -q config:store:set dev/js/enable_js_bundling 0");
+            $this->run("n -q config:store:set dev/js/minify_files 0");
+        }
         
         $this->show_status(60,100, 'Running setup:upgrade');
         $response = $this->_shell->execute($this->getBinMagento().' setup:upgrade');
         $response = $this->_shell->execute($this->getBinMagento().' setup:static-content:deploy');
         
-        $this->show_status(80,100, 'Updating Permissions');
-        $this->run("permissions -y -q $userGroup");
+        if ($this->getParameters()->getFull()) {
+            $this->show_status(80,100, 'Updating Permissions');
+            $this->run("permissions -y -q $userGroup");
+        }
         $this->show_status(100,100, 'Done with dev:build');
     }
     
@@ -151,10 +157,10 @@ class Development extends \Quik\CommandAbstract
     /**
      *
      */
-    public function executeGitignore()
+    public function executeGitignoreMin()
     {
         $this->echo('Installing gitignore file at '.$this->getGitignorePath());
-        file_put_contents($this->getGitignorePath(), $this->getGitSource(), FILE_APPEND);
+        file_put_contents($this->getGitignorePath(), $this->getNoMediaGitIgnore(), FILE_APPEND);
         // test
         $source = file_get_contents($this->getGitignorePath());
         if (!strlen($source)) {
@@ -165,13 +171,13 @@ class Development extends \Quik\CommandAbstract
     /**
      *
      */
-    public function executeGitignoreLocal()
+    public function executeGitignore()
     {
-        if (file_exists(dirname($this->getExcludePath()))) {
-            $this->echo('Installing local gitignore file at '.$this->getExcludePath());
-            file_put_contents($this->getExcludePath(), $this->getExcludeSource(), FILE_APPEND);
+        if (file_exists(dirname($this->getGitignorePath()))) {
+            $this->echo('Installing local gitignore file at '.$this->getGitignorePath());
+            file_put_contents($this->getGitignorePath(), $this->getNoVendorSource(), FILE_APPEND);
             // test
-            $source = file_get_contents($this->getExcludePath());
+            $source = file_get_contents($this->getGitignorePath());
             if (!strlen($source)) {
                 $this->echo('Could not write to the local gitignore location...', SELF::YELLOW);
             }
@@ -210,18 +216,18 @@ class Development extends \Quik\CommandAbstract
      * 
      * @return string
      */
-    public function getExcludePath()
+    protected function getGitignorePath()
     {
-        return $this->_app->getGitDir().DIRECTORY_SEPARATOR.'info'.DIRECTORY_SEPARATOR.'exclude';
+        return $this->_app->getWebrootDir().'.gitignore';
     }
     
     /**
      * Return the contents of the development gitignore file
      * @return string
      */
-    public function getExcludeSource()
+    public function getNoVendorSource()
     {
-        $filename = $this->_app->getQuikDir().DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'development_gitignore';
+        $filename = $this->_app->getQuikDir().DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'no_vendor_gitignore';
         return file_get_contents($filename);
     }
     
@@ -229,9 +235,9 @@ class Development extends \Quik\CommandAbstract
      * Return the contents of the development gitignore file
      * @return string
      */
-    public function getGitSource()
+    public function getNoMediaGitIgnore()
     {
-        $filename = $this->_app->getQuikDir().DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'production_gitignore';
+        $filename = $this->_app->getQuikDir().DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR.'no_media_gitignore';
         return file_get_contents($filename);
     }
 }
