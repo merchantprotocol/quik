@@ -118,7 +118,6 @@ class Production extends \Quik\CommandAbstract
         $this->show_status(25,100, 'Running Composer');
         $this->_shell->execute("composer install -d {$this->getParameters()->getDirectory()} --no-dev");
         $this->_shell->execute("composer dump-autoload -d {$this->getParameters()->getDirectory()} --no-dev --optimize");
-        $this->_shell->execute("composer update -d {$this->getParameters()->getDirectory()} --no-dev");
         
         $this->show_status(35,100, "Importing Configurations");
         $this->_shell->execute($this->getBinMagento().' app:config:import');

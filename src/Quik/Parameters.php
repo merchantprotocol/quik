@@ -97,13 +97,6 @@ class Parameters
                 } elseif ($arg == '--full') {
                     $this->__dev_full = true;
                     
-                } elseif ($arg == '--major') {
-                    $this->__version_major = true;
-                } elseif ($arg == '--minor') {
-                    $this->__version_minor = true;
-                } elseif ($arg == '--patch') {
-                    $this->__version_patch = true;
-                    
                 } elseif ($arg == '-o' || $arg == '--off') {
                     $this->__maintenance_off = true;
                 } elseif ($arg == '--csr') {

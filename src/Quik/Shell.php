@@ -68,6 +68,7 @@ class Shell
             return;
         }
         
+        $exitCode = 0;
         $command = $this->render($command, $arguments);
         if ($passthru) {
             $descriptorSpec = array(
@@ -84,6 +85,11 @@ class Shell
             exec($command, $output, $exitCode);
             $output = implode(PHP_EOL, $output);
         }
+        if ($exitCode !== 0) {
+            echo $output;
+            exit($exitCode);
+        }
+        
         return $this->response($output, $exitCode, $command);
     }
     

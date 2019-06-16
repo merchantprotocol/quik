@@ -81,12 +81,18 @@ class Permissions extends \Quik\CommandAbstract
         ."{$this->_app->getWebrootDir()}vendor {$this->_app->getWebrootDir()}pub/static {$this->_app->getWebrootDir()}pub/media "
         ."{$this->_app->getWebrootDir()}app/etc -type d -exec chmod g+ws {} +");
         
+        $this->_shell->execute("chcon -R -h -t httpd_sys_rw_content_t {$this->_app->getWebrootDir()}generated");
+        $this->_shell->execute("chcon -R -h -t httpd_sys_rw_content_t {$this->_app->getWebrootDir()}var");
+        $this->_shell->execute("chcon -R -h -t httpd_sys_rw_content_t {$this->_app->getWebrootDir()}pub/static");
+        $this->_shell->execute("chcon -R -h -t httpd_sys_rw_content_t {$this->_app->getWebrootDir()}pub/media");
+        
         $this->echo('Updating specific files', SELF::GREEN);
         $response = $this->_shell->execute("mkdir {$this->_app->getWebrootDir()}pub/static");
         $response = $this->_shell->execute("chmod 775 {$this->_app->getWebrootDir()}pub/static");
         $response = $this->_shell->execute("chmod 664 {$this->_app->getWebrootDir()}app/etc/*.xml");
         $response = $this->_shell->execute("chmod u+x {$this->_app->getWebrootDir()}bin/magento");
         $response = $this->_shell->execute("chmod u+x {$this->_app->getWebrootDir()}vendor/bin/quik");
+        $response = $this->_shell->execute("chmod u+x {$this->_app->getWebrootDir()}vendor/merchantprotocol/quik/src/Quik/n98-magerun2.phar");
 
         $response = $this->_shell->execute('find %s -not -user %s -execdir chown %s:%s {} \+', 
             [$this->_app->getWebrootDir(),$this->getUser(),$this->getUser(),$this->getGroup()]);

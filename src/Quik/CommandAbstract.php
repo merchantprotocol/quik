@@ -376,6 +376,7 @@ class CommandAbstract
         echo '|  Webserver Group:       '.$this->getGroup().PHP_EOL;
         echo '|  Path to webroot:       '.$this->_app->getWebrootDir().PHP_EOL;
         echo '|  Path to bin/magento:   '.$this->getBinMagento().PHP_EOL;
+        echo '|  Deploy Dir:            '.$this->getParameters()->getDeployDir().PHP_EOL;
         echo '------------------------------------------------'.PHP_EOL;
     }
     

@@ -137,6 +137,7 @@ class Application
             }
             if ($this->_commandClass && is_callable(array($this->getCommand(), 'showUsage'))) {
                 $this->getCommand()->showUsage();
+                $this->getCommand()->showInfo();
             } else {
                 $this->showUsage();
                 

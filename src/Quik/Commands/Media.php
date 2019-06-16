@@ -56,7 +56,7 @@ class Media extends \Quik\CommandAbstract
         echo ' Helps with managing a single media directory for all releases'.PHP_EOL;
         echo PHP_EOL;
         echo ' Commands:'.PHP_EOL;
-        echo '  media              Show help and information'.PHP_EOL;
+        echo '  media              1. Move the local media to the base location 2. Take a backup 3. Remove the local media dir 4. Symlink from base to local.'.PHP_EOL;
         echo '  media:ls           Symlink the media directory to a release directory'.PHP_EOL;
         echo '  media:archive      Archive the media directory and back it up to Amazon S3'.PHP_EOL;
         echo PHP_EOL;
@@ -107,7 +107,7 @@ class Media extends \Quik\CommandAbstract
             $this->echo('This installation is not configured for zero downtime deployments.');
             exit(0);
         }
-        if (!file_exists($this->_getBaseMediaDir()) && !$this->confirm('Do you want to continue with the installation process?')) {
+        if (!file_exists($this->_getBaseMediaDir()) && !$this->confirm('Do you want to continue moving the media dir to '.$this->_getBaseMediaDir())) {
             $this->echo('Aborting',SELF::RED);
             exit(0);
         }

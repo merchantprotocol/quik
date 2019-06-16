@@ -48,7 +48,7 @@ class Apache
      *
      * @var string
      */
-    CONST GETUSER = "ps -axo user:19,comm | egrep '(httpd|apache2|apache)' | grep -v `whoami` | grep -v root | head -n1 | awk '{print $1}'";
+    CONST GETUSER = "ps -axo user:19,comm | egrep '(httpd|apache2|apache|php)' | grep -v `whoami` | grep -v root | head -n1 | awk '{print $1}'";
     
     /**
      * Add the username and this will return the groups of that user.
@@ -76,7 +76,13 @@ class Apache
         
         $this->_apacheuser = $this->_getUser();
         // @todo should make this more intelligent to determine the exact apache group to use
-        $this->_apachegroup = $this->_getUser();
+        if (count($this->_getGroups())==1) {
+            $this->_apachegroup = $this->_getUser();
+        } elseif (in_array('apache', $this->_getGroups())) {
+            $this->_apachegroup = 'apache';
+        } elseif (in_array('nginx', $this->_getGroups())) {
+            $this->_apachegroup = 'nginx';
+        }
     }
     
     /**

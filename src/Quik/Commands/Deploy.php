@@ -131,7 +131,7 @@ class Deploy extends \Quik\CommandAbstract
     public function execute()
     {
         $baseDir = $this->_getBaseDir();
-        if (!$this->confim("Create the deploy folder architecture at {$baseDir}")) {
+        if (!$this->confirm("Create the deploy folder architecture at {$baseDir}")) {
             $this->echo('Aborted');
             exit(0);
         }
