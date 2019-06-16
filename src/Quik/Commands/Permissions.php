@@ -87,7 +87,7 @@ class Permissions extends \Quik\CommandAbstract
         $this->_shell->execute("chcon -R -h -t httpd_sys_rw_content_t {$this->_app->getWebrootDir()}pub/media");
         
         $this->echo('Updating specific files', SELF::GREEN);
-        $response = $this->_shell->execute("mkdir {$this->_app->getWebrootDir()}pub/static");
+        $response = $this->_shell->execute("mkdir -p {$this->_app->getWebrootDir()}pub/static");
         $response = $this->_shell->execute("chmod 775 {$this->_app->getWebrootDir()}pub/static");
         $response = $this->_shell->execute("chmod 664 {$this->_app->getWebrootDir()}app/etc/*.xml");
         $response = $this->_shell->execute("chmod u+x {$this->_app->getWebrootDir()}bin/magento");

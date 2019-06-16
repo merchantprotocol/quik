@@ -117,8 +117,8 @@ class Development extends \Quik\CommandAbstract
         
         if ($this->getParameters()->getFull()) {
             $this->show_status(35,100, 'Running Composer');
-            $this->_shell->execute("composer install");
-            $this->_shell->execute("composer update");
+            $this->_shell->execute("composer install -d {$this->getParameters()->getDirectory()}");
+            $this->_shell->execute("composer update -d {$this->getParameters()->getDirectory()}");
         }
         
         $this->show_status(45,100, 'Importing Configuration');

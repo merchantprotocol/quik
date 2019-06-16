@@ -69,6 +69,7 @@ class Shell
         }
         
         $exitCode = 0;
+        $output = 0;
         $command = $this->render($command, $arguments);
         if ($passthru) {
             $descriptorSpec = array(
