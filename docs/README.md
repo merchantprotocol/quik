@@ -22,7 +22,7 @@ With Quik all of your complicated commands are stored safe into short Quik comma
 
  Homepage: https://merchantprotocol.com/
  Author: Jack <jonathon@merchantprotocol.com>
- Version: Quik v0.0.7
+ Version: Quik v0.0.8
  
  
  Usage: quik <command> [options] [args]

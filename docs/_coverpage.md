@@ -1,6 +1,6 @@
 
 
-# QUIK <small>0.0.7</small>
+# QUIK <small>0.0.8</small>
 
 > Magento 2 Management Project
 
