@@ -271,33 +271,35 @@ class Deploy extends \Quik\CommandAbstract
             $this->_shell->execute("rm -rf %s", [$sistDir]);
         }
         
-        $this->echo("git clone --depth=1 $url $sistDir", \Quik\CommandAbstract::YELLOW);
+        $this->show_status(0,100, "Cloning $tag");
         $this->_shell->execute("git clone --depth=1 $url $sistDir",[],true);
         
-        $this->echo("git --git-dir=$sistDir/.git --work-tree=$sistDir fetch --tags", \Quik\CommandAbstract::YELLOW);
+        $this->show_status(20,100, 'Fetching Tags');
         $this->_shell->execute("git --git-dir=$sistDir/.git --work-tree=$sistDir fetch --tags",[],true);
         
-        $this->echo("git --git-dir=$sistDir/.git --work-tree=$sistDir checkout tags/$tag -b $tag", \Quik\CommandAbstract::YELLOW);
+        $this->show_status(40,100, "Checking out $tag");
         $this->_shell->execute("git --git-dir=$sistDir/.git --work-tree=$sistDir checkout tags/$tag -b $tag");
         
         $modulesDir = $this->_app->getWebrootDir().'.git'.DIRECTORY_SEPARATOR.'modules';
         $sisModulesDir = $sistDir.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR;
-        $this->echo("cp -r $modulesDir $sisModulesDir", \Quik\CommandAbstract::YELLOW);
+        $this->show_status(50,100, 'Copy .git/modules');
         $this->_shell->execute("cp -r $modulesDir $sisModulesDir");
         
         $envPhp = $this->_app->getWebrootDir().'app'.DIRECTORY_SEPARATOR.'etc'.DIRECTORY_SEPARATOR.'env.php';
         $sisEnvPhp = $sistDir.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'etc';
-        $this->echo("cp $envPhp $sisEnvPhp", \Quik\CommandAbstract::YELLOW);
+        $this->show_status(60,100, 'Copy env.php');
         $this->_shell->execute("cp $envPhp $sisEnvPhp");
         
-        $this->echo("Composer Install", \Quik\CommandAbstract::YELLOW);
+        $this->show_status(65,100, 'Composer Install');
         $this->_shell->execute("composer install -d $sistDir --no-dev");
         
-        $this->echo("git --git-dir=$sistDir/.git --work-tree=$sistDir submodule update --init --recursive", \Quik\CommandAbstract::YELLOW);
+        $this->show_status(85,100, 'Git submodule update');
         $this->_shell->execute("cd $sistDir && git submodule update --init --recursive");
         
-        $this->echo("composer dump-autoload -d $sistDir --no-dev --optimize", \Quik\CommandAbstract::YELLOW);
+        $this->show_status(95,100, 'Composer dump-autoload');
         $this->_shell->execute("composer dump-autoload -d $sistDir --no-dev --optimize");
+        
+        $this->show_status(100,100, 'Deploy Complete');
         
         $this->run("media --dir=$sistDir -y");
         $this->run("prod:build --dir=$sistDir -y");
