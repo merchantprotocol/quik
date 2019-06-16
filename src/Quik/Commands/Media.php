@@ -216,7 +216,7 @@ class Media extends \Quik\CommandAbstract
         if (is_null($this->_media_dir))
         {
             $response = $this->_shell->execute('ls -la %s | grep "\->"', [$this->_getLocalMediaDir()], false, false);
-            list($na, $link) = explode("->", $response->output);
+            list($na, $link) = array_pad(explode("->", $response->output), 2, null);
             if ($link) {
                 $this->_media_dir = rtrim(trim($link),DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
             } elseif (file_exists($this->_getBaseMediaDir().'.htaccess')) {

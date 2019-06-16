@@ -105,13 +105,7 @@ class Gzip extends \Quik\CommandAbstract
      * 
      */
     public function execute()
-    {
-        foreach ($this->_patterns as $pattern) {
-            foreach(glob($pattern) as $filepath) {
-                $this->echo($filepath);
-            }
-        }
-        
+    {   
         // precompress all files in these directories
         foreach ($this->_dirs as $dir) {
             $this->_shell->execute(SELF::GZIP_FILES, [$this->_app->getWebrootDir().$dir]);
