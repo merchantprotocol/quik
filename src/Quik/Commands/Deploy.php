@@ -294,11 +294,9 @@ class Deploy extends \Quik\CommandAbstract
         $this->_shell->execute("composer install -d $sistDir --no-dev");
         
         $this->echo("git --git-dir=$sistDir/.git --work-tree=$sistDir submodule update --init --recursive", \Quik\CommandAbstract::YELLOW);
-        $response = $this->_shell->execute("git --git-dir=$sistDir/.git --work-tree=$sistDir submodule update --init --recursive");
-        if (strpos($response->output, 'fatal: /usr/lib/git-core/git-submodule')!==false) {
-            $this->_shell->execute("cd $sistDir && git submodule update --init --recursive",[],true);
-        }
+        $this->_shell->execute("cd $sistDir && git submodule update --init --recursive");
         
+        $this->echo("composer dump-autoload -d $sistDir --no-dev --optimize", \Quik\CommandAbstract::YELLOW);
         $this->_shell->execute("composer dump-autoload -d $sistDir --no-dev --optimize");
         
         $this->run("media --dir=$sistDir -y");

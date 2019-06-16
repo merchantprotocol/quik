@@ -54,13 +54,14 @@ class Shell
     /**
      * Execute a command through the command line, passing properly escaped arguments, and return its output
      *
-     * @param string   $command Command with optional argument markers '%s'
-     * @param string[] $arguments Argument values to substitute markers with
-     * @param boolean  $passthru returns no output, but triggers some command that is interactive
+     * @param string   $command     Command with optional argument markers '%s'
+     * @param string[] $arguments   Argument values to substitute markers with
+     * @param boolean  $passthru    Returns no output, but triggers some command that is interactive
+     * @param boolean  $failOnError 
      * @return stdClass
      * @throws Exception
      */
-    public function execute($command, $arguments = [], $passthru = false)
+    public function execute($command, $arguments = [], $passthru = false, $failOnError = true)
     {
         $disabled = explode(',', str_replace(' ', ',', ini_get('disable_functions')));
         if (in_array('exec', $disabled)) {
@@ -69,7 +70,7 @@ class Shell
         }
         
         $exitCode = 0;
-        $output = 0;
+        $output = '';
         $command = $this->render($command, $arguments);
         if ($passthru) {
             $descriptorSpec = array(
@@ -86,7 +87,7 @@ class Shell
             exec($command, $output, $exitCode);
             $output = implode(PHP_EOL, $output);
         }
-        if ($exitCode !== 0) {
+        if ($failOnError && $exitCode !== 0) {
             echo $output;
             exit($exitCode);
         }

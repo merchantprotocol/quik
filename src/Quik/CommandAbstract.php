@@ -88,6 +88,7 @@ class CommandAbstract
     
     protected $_user = null;
     protected $_group = null;
+    protected $_base_dir = null;
     
     /**
      *

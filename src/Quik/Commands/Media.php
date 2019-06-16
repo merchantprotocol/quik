@@ -215,7 +215,7 @@ class Media extends \Quik\CommandAbstract
     {
         if (is_null($this->_media_dir))
         {
-            $response = $this->_shell->execute('ls -la %s | grep "\->"', [$this->_getLocalMediaDir()]);
+            $response = $this->_shell->execute('ls -la %s | grep "\->"', [$this->_getLocalMediaDir()], false, false);
             list($na, $link) = explode("->", $response->output);
             if ($link) {
                 $this->_media_dir = rtrim(trim($link),DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
