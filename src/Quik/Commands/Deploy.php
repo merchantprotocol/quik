@@ -272,18 +272,16 @@ class Deploy extends \Quik\CommandAbstract
         }
         
         $this->show_status(0,100, "Cloning $tag");
+        echo PHP_EOL;
         $this->_shell->execute("git clone --depth=1 $url $sistDir",[],true);
         
         $this->show_status(20,100, 'Fetching Tags');
+        echo PHP_EOL;
         $this->_shell->execute("git --git-dir=$sistDir/.git --work-tree=$sistDir fetch --tags",[],true);
         
         $this->show_status(40,100, "Checking out $tag");
+        echo PHP_EOL;
         $this->_shell->execute("git --git-dir=$sistDir/.git --work-tree=$sistDir checkout tags/$tag -b $tag");
-        
-        $modulesDir = $this->_app->getWebrootDir().'.git'.DIRECTORY_SEPARATOR.'modules';
-        $sisModulesDir = $sistDir.DIRECTORY_SEPARATOR.'.git'.DIRECTORY_SEPARATOR;
-        $this->show_status(50,100, 'Copy .git/modules');
-        $this->_shell->execute("cp -r $modulesDir $sisModulesDir");
         
         $envPhp = $this->_app->getWebrootDir().'app'.DIRECTORY_SEPARATOR.'etc'.DIRECTORY_SEPARATOR.'env.php';
         $sisEnvPhp = $sistDir.DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'etc';

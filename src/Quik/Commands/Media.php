@@ -116,6 +116,19 @@ class Media extends \Quik\CommandAbstract
             exit(0);
         }
         
+        $this->show_status(0,100, "Checking local directory");
+        
+        // If the base exists, and the local exists, then backup the local, delete it and symlink the base
+        if (file_exists($this->_getBaseMediaDir().'.htaccess')) {
+            if (file_exists($this->_getLocalMediaDir().'.htaccess') && !$this->_isLocalSymlinked()) {
+                $this->show_status(5,100, "Backing up local media");
+                $this->executeArchive( $this->_getLocalMediaDir() );
+                
+                $this->show_status(10,100, "Removing local media");
+                $this->_shell->execute('rm -rf %s', [$this->_getLocalMediaDir()]);
+            }
+        }
+        
         // if the actual is still local then lets move it to base
         if ($this->_getActualMediaDir() !== $this->_getBaseMediaDir()) {
             // if the local exists then copy it
@@ -123,7 +136,7 @@ class Media extends \Quik\CommandAbstract
                 
                 $from = str_replace($this->_getBaseDir(), '', $this->_getActualMediaDir());
                 $to = str_replace($this->_getBaseDir(), '', $this->_getBaseMediaDir());
-                $this->show_status(0,100, "Copy from $from to $to");
+                $this->show_status(20,100, "Copy from $from to $to");
                 
                 if (file_exists($this->_getBaseMediaDir())) {
                     $this->_shell->execute('cp -rLfpu '.$this->_getActualMediaDir().'* %s', [$this->_getBaseMediaDir()]);
@@ -135,7 +148,7 @@ class Media extends \Quik\CommandAbstract
                 }
             }
             // take a backup of base
-            $this->show_status(30,100, 'Starting Media Folder Backup');
+            $this->show_status(40,100, 'Starting Media Folder Backup');
             if ($this->executeArchive()) {
                 // remove local
                 if (file_exists($this->_getActualMediaDir()) && strlen($this->_getActualMediaDir())>3) {
@@ -149,22 +162,28 @@ class Media extends \Quik\CommandAbstract
         $this->_media_dir = null;
         // if actual is now base then create symlinks
         if ($this->_getActualMediaDir() == $this->_getBaseMediaDir()) {
-            $this->show_status(100,100, 'Completing Symlink back to local media dir');
+            $this->show_status(90,100, 'Creating Symlink');
             $this->executeLn();
         }
+        
+        $this->show_status(100,100, 'Completed with Media');
     }
     
     /**
      * Archive the base media directory
      */
-    public function executeArchive()
+    public function executeArchive( $directory = false )
     {
         if (!file_exists($this->_getMediaBackupsDir())) {
             $this->_shell->execute('mkdir -p %s',[$this->_getMediaBackupsDir()]);
         }
         
+        if (!$directory) {
+            $directory = $this->_getBaseMediaDir();
+        }
+        
         $archiveFilename = $this->_getMediaBackupsDir().date('Y_m_d__H_i_s').'.tar';
-        $this->_shell->execute("tar -cf %s %s", [$archiveFilename, $this->_getBaseMediaDir()]);
+        $this->_shell->execute("tar -cf %s %s", [$archiveFilename, $directory]);
         $archiveSize = $this->_shell->execute("du -sh %s",[$archiveFilename]);
         list($size, $path) = explode("\t", $archiveSize->output);
         
@@ -186,7 +205,6 @@ class Media extends \Quik\CommandAbstract
             exit(0);
         }
         $this->_shell->execute("ln -s %s %s", [$this->_getActualMediaDir(), rtrim($this->_getLocalMediaDir(),DIRECTORY_SEPARATOR)]);
-        $this->echo('Symlinked base to local media', SELF::GREEN);
     }
     
     /**
@@ -208,6 +226,17 @@ class Media extends \Quik\CommandAbstract
     }
     
     /**
+     * return the symlink if 
+     * @return boolean|array
+     */
+    protected function _isLocalSymlinked()
+    {
+        $response = $this->_shell->execute('ls -la %s | grep "\->"', [$this->_getLocalMediaDir()], false, false);
+        list($na, $link) = array_pad(explode("->", $response->output), 2, null);
+        return !is_null($link) ?$link :false;
+    }
+    
+    /**
      *
      * @return string
      */
@@ -215,9 +244,7 @@ class Media extends \Quik\CommandAbstract
     {
         if (is_null($this->_media_dir))
         {
-            $response = $this->_shell->execute('ls -la %s | grep "\->"', [$this->_getLocalMediaDir()], false, false);
-            list($na, $link) = array_pad(explode("->", $response->output), 2, null);
-            if ($link) {
+            if ($link = $this->_isLocalSymlinked()) {
                 $this->_media_dir = rtrim(trim($link),DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
             } elseif (file_exists($this->_getBaseMediaDir().'.htaccess')) {
                 $this->_media_dir = $this->_getBaseMediaDir();

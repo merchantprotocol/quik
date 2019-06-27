@@ -75,6 +75,11 @@ class Production extends \Quik\CommandAbstract
      */
     public function executeBuild()
     {
+        $directory = $this->getParameters()->getDirectory();
+        if (!$directory) {
+            $directory = $this->_app->getWebrootDir();
+        }
+        
         // check mode
         $response = $this->_shell->execute($this->getBinMagento().' deploy:mode:show');
         $mode = substr($response->output, strlen('Current application mode: '),9);
@@ -116,8 +121,8 @@ class Production extends \Quik\CommandAbstract
         $this->run("clear -y -q");
         
         $this->show_status(25,100, 'Running Composer');
-        $this->_shell->execute("composer install -d {$this->getParameters()->getDirectory()} --no-dev");
-        $this->_shell->execute("composer dump-autoload -d {$this->getParameters()->getDirectory()} --no-dev --optimize");
+        $this->_shell->execute("composer install -d $directory --no-dev");
+        $this->_shell->execute("composer dump-autoload -d $directory --no-dev --optimize");
         
         $this->show_status(35,100, "Importing Configurations");
         $this->_shell->execute($this->getBinMagento().' app:config:import');

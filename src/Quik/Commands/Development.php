@@ -135,7 +135,7 @@ class Development extends \Quik\CommandAbstract
         
         $this->show_status(60,100, 'Running setup:upgrade');
         $response = $this->_shell->execute($this->getBinMagento().' setup:upgrade');
-        $response = $this->_shell->execute($this->getBinMagento().' setup:static-content:deploy');
+        $response = $this->_shell->execute($this->getBinMagento().' setup:static-content:deploy -f');
         
         if ($this->getParameters()->getFull()) {
             $this->show_status(80,100, 'Updating Permissions');
