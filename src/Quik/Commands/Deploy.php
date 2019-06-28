@@ -294,8 +294,8 @@ class Deploy extends \Quik\CommandAbstract
         $this->show_status(85,100, 'Git submodule update');
         $this->_shell->execute("cd $sistDir && git submodule update --init --recursive");
         
-        $this->show_status(95,100, 'Composer dump-autoload');
-        $this->_shell->execute("composer dump-autoload -d $sistDir --no-dev --optimize");
+        //$this->show_status(95,100, 'Composer dump-autoload');
+        //$this->_shell->execute("composer dump-autoload -d $sistDir --no-dev --optimize");
         
         $this->show_status(100,100, 'Deploy Complete');
         
@@ -308,15 +308,21 @@ class Deploy extends \Quik\CommandAbstract
      */
     public function executeInstall()
     {
-        $tag = $this->_getGitTag();
-        $sistDir = dirname($this->_app->getWebrootDir()).DIRECTORY_SEPARATOR.$tag;
-        
-        $this->echo("Composer Install", \Quik\CommandAbstract::YELLOW);
+        $tag = $this->_getGitTag( false );
+        if ($tag) {
+            $sistDir = dirname($this->_app->getWebrootDir()) . DIRECTORY_SEPARATOR . $tag;
+        } else {
+            $sistDir = $this->_app->getWebrootDir();
+        }
+
+        $this->show_status(0,100, 'Composer Install');
         $this->_shell->execute("composer install -d $sistDir --no-dev");
-        $this->_shell->execute("composer dump-autoload -d $sistDir --no-dev --optimize");
-        
-        $this->echo("Git Submodule Update", \Quik\CommandAbstract::YELLOW);
-        $response = $this->getShell()->execute('git submodule update --init --recursive');
+        //$this->_shell->execute("composer dump-autoload -d $sistDir --no-dev --optimize");
+
+        $this->show_status(85,100, 'Git submodule update');
+        $response = $this->getShell()->execute("cd $sistDir && git submodule update --init --recursive");
+
+        $this->show_status(100,100, 'Done');
     }
     
     /**
@@ -324,17 +330,17 @@ class Deploy extends \Quik\CommandAbstract
      * @var string
      */
     protected $_tag = null;
-    
+
     /**
-     *
-     * @return boolean
+     * @param null $default
+     * @return string
      */
-    protected function _getGitTag()
+    protected function _getGitTag( $default = null )
     {
         if (is_null($this->_tag)) {
             $tag = false;
             @list($tag, $repo) = $this->getArgs();
-            if (!$tag) {
+            if (!$tag && is_null($default)) {
                 $this->echo('Please include the release tag.', \Quik\CommandAbstract::YELLOW);
                 if (empty($this->_getTags())) {
                     exit(0);
@@ -350,6 +356,9 @@ class Deploy extends \Quik\CommandAbstract
                         }
                     }
                 }
+            }
+            elseif ($default) {
+                $tag = $default;
             }
             $this->_tag = $tag;
         }

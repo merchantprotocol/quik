@@ -444,7 +444,7 @@ class CommandAbstract
     {
         if (is_null($this->_base_dir)) {
             if ($this->getParameters()->getDeployDir()) {
-                $this->_base_dir = rtrim($this->getParameters()->getDeployDir(), '/').DIRECTORY_SEPARATOR;
+                $this->_base_dir = rtrim(dirname(dirname($this->getParameters()->getDeployDir())), '/').DIRECTORY_SEPARATOR;
             } else {
                 
                 $test = dirname($this->_app->getWebrootDir()).DIRECTORY_SEPARATOR.SELF::RELEASES_JSON;

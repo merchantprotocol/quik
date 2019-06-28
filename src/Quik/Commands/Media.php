@@ -52,7 +52,7 @@ class Media extends \Quik\CommandAbstract
      */
     public function showUsage()
     {
-        echo ' Usage: '.\Quik\CommandAbstract::GREEN.'quik deploy [options]'.\Quik\CommandAbstract::NC.PHP_EOL;
+        echo ' Usage: '.\Quik\CommandAbstract::GREEN.'quik media [options]'.\Quik\CommandAbstract::NC.PHP_EOL;
         echo ' Helps with managing a single media directory for all releases'.PHP_EOL;
         echo PHP_EOL;
         echo ' Commands:'.PHP_EOL;
@@ -63,6 +63,13 @@ class Media extends \Quik\CommandAbstract
         echo ' Options:'.PHP_EOL;
         echo '  -h, --help         Show this message'.PHP_EOL;
         echo '  -y                 Preapprove the confirmation prompt.'.PHP_EOL;
+        echo PHP_EOL;
+        echo ' Info:'.PHP_EOL;
+        echo '  Base Dir:         '.$this->_getBaseDir().PHP_EOL;
+        echo '  Base Media Dir:   '.$this->_getBaseMediaDir().PHP_EOL;
+        echo '  Local Media Dir:  '.$this->_getLocalMediaDir().PHP_EOL;
+        echo '  Actual Media Dir: '.$this->_getActualMediaDir().PHP_EOL;
+        echo PHP_EOL;
         echo PHP_EOL;
     }
     
@@ -103,6 +110,10 @@ class Media extends \Quik\CommandAbstract
      */
     public function execute()
     {
+        if ($this->getParameters()->getHelp()) {
+            return;
+        }
+
         if (!file_exists($this->_getBaseDir())) {
             $this->echo('This installation is not configured for zero downtime deployments.');
             exit(0);
@@ -246,10 +257,10 @@ class Media extends \Quik\CommandAbstract
         {
             if ($link = $this->_isLocalSymlinked()) {
                 $this->_media_dir = rtrim(trim($link),DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
-            } elseif (file_exists($this->_getBaseMediaDir().'.htaccess')) {
-                $this->_media_dir = $this->_getBaseMediaDir();
-            } else {
+            } elseif (file_exists($this->_getLocalMediaDir().'.htaccess')) {
                 $this->_media_dir = $this->_getLocalMediaDir();
+            } else {
+                $this->_media_dir = $this->_getBaseMediaDir();
             }
         }
         return $this->_media_dir;
