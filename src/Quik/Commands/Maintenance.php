@@ -61,7 +61,12 @@ class Maintenance extends \Quik\CommandAbstract
     public function execute()
     {
         if ($this->getOff()) {
-            $response = $this->_shell->execute($this->getBinMagento()." maintenance:enable --ip={$this->getCurrentUserIp()}");
+            $ip = '';
+            if ($this->getCurrentUserIp()) {
+                $ip = '--ip='.$this->getCurrentUserIp();
+            }
+
+            $response = $this->_shell->execute($this->getBinMagento()." maintenance:enable $ip");
             $this->echo($response->output);
             $this->echo("Splash page is up for visitors!", SELF::GREEN);
         } else {

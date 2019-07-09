@@ -59,8 +59,11 @@ class User
      */
     public function getIp()
     {
-        $response = $this->_shell->execute('dig +short myip.opendns.com @resolver1.opendns.com');
-        return $response->output;
+        $response = $this->_shell->execute('dig +short myip.opendns.com @resolver1.opendns.com', [], false, false);
+        if ($response->exit_code !== 0) {
+            return $response->output;
+        }
+        return false;
     }
     
     /**

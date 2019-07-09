@@ -122,10 +122,9 @@ class Production extends \Quik\CommandAbstract
         
         $this->show_status(25,100, 'Running Composer');
         $this->_shell->execute("composer install -d $directory --no-dev");
-        $this->_shell->execute("composer dump-autoload -d $directory --no-dev --optimize");
         
         $this->show_status(35,100, "Importing Configurations");
-        $this->_shell->execute($this->getBinMagento().' app:config:import');
+        $this->_shell->execute($this->getBinMagento().' app:config:import', [], true);
         
         $this->show_status(40,100, "Enabling Merged Assets");
         $this->run("n -q config:store:set dev/css/merge_css_files 1");
