@@ -67,6 +67,9 @@ class Permissions extends \Quik\CommandAbstract
         $this->echo('Entering Directory '.$this->_app->getWebrootDir(), SELF::GREEN);
         $response = $this->_shell->execute("cd %s", [$this->_app->getWebrootDir()]);
         
+        $this->_shell->execute("mkdir -p {$this->_app->getWebrootDir()}var/cache");
+        $this->_shell->execute("mkdir -p {$this->_app->getWebrootDir()}pub/static");
+        
         $this->echo('Resetting all files to 664 and directories to 775', SELF::GREEN);
         $response = $this->_shell->execute('find %s -type f -not -perm 664 -exec chmod 664 {} \;',[$this->_app->getWebrootDir()]);
         $response = $this->_shell->execute('find %s -type d -not -perm 775 -exec chmod 775 {} \;', [$this->_app->getWebrootDir()]);
@@ -80,19 +83,20 @@ class Permissions extends \Quik\CommandAbstract
         $response = $this->_shell->execute("find {$this->_app->getWebrootDir()}var {$this->_app->getWebrootDir()}generated "
         ."{$this->_app->getWebrootDir()}vendor {$this->_app->getWebrootDir()}pub/static {$this->_app->getWebrootDir()}pub/media "
         ."{$this->_app->getWebrootDir()}app/etc -type d -exec chmod g+ws {} +");
+        
+        
 
         $response = $this->_shell->execute("getenforce", [], false, false);
         if (strpos($response->output, 'enforcing') !== false) {
-            $this->_shell->execute("sudo chcon -R -h -t system_u:object_r:httpd_sys_content_t:s0  {$this->_app->getWebrootDir()}", [], false, false);
-            $this->_shell->execute("sudo chcon -R -h -t system_u:object_r:httpd_sys_rw_content_t:s0 {$this->_app->getWebrootDir()}generated", [], false, false);
-            $this->_shell->execute("sudo chcon -R -h -t system_u:object_r:httpd_sys_rw_content_t:s0 {$this->_app->getWebrootDir()}var", [], false, false);
-            $this->_shell->execute("sudo chcon -R -h -t system_u:object_r:httpd_sys_rw_content_t:s0 {$this->_app->getWebrootDir()}pub/static", [], false, false);
-            $this->_shell->execute("sudo chcon -R -h -t system_u:object_r:httpd_sys_rw_content_t:s0 {$this->_app->getWebrootDir()}pub/media", [], false, false);
-            $this->_shell->execute("sudo chcon -R -h -t system_u:object_r:httpd_sys_rw_content_t:s0 {$this->_app->getWebrootDir()}app/etc", [], false, false);
+            $this->_shell->execute("sudo chcon -R -h system_u:object_r:httpd_sys_content_t:s0  {$this->_app->getWebrootDir()}", [], false, false);
+            $this->_shell->execute("sudo chcon -R -h system_u:object_r:httpd_sys_rw_content_t:s0 {$this->_app->getWebrootDir()}generated", [], false, false);
+            $this->_shell->execute("sudo chcon -R -h system_u:object_r:httpd_sys_rw_content_t:s0 {$this->_app->getWebrootDir()}var", [], false, false);
+            $this->_shell->execute("sudo chcon -R -h system_u:object_r:httpd_sys_rw_content_t:s0 {$this->_app->getWebrootDir()}var/cache", [], false, false);
+            $this->_shell->execute("sudo chcon -R -h system_u:object_r:httpd_sys_rw_content_t:s0 {$this->_app->getWebrootDir()}pub/static", [], false, false);
+            $this->_shell->execute("sudo chcon -R -h system_u:object_r:httpd_sys_rw_content_t:s0 {$this->_app->getWebrootDir()}pub/media", [], false, false);
         }
 
         $this->echo('Updating specific files', SELF::GREEN);
-        $response = $this->_shell->execute("mkdir -p {$this->_app->getWebrootDir()}pub/static");
         $response = $this->_shell->execute("sudo chmod 775 {$this->_app->getWebrootDir()}pub/static");
         $response = $this->_shell->execute("sudo chmod 664 {$this->_app->getWebrootDir()}app/etc/*.xml");
         $response = $this->_shell->execute("sudo chmod u+x {$this->_app->getWebrootDir()}bin/magento");

@@ -62,11 +62,19 @@ class Clear extends \Quik\CommandAbstract
             $this->_app->getWebrootDir().'generated/code/*',
             $this->_app->getWebrootDir().'generated/metadata/*',
             $this->_app->getWebrootDir().'pub/static/*',
+            '/var/cache/nginx/*'
         ];
         
         $command = $this->_shell->execute('rm -rf '.implode($dirs, ' '));
         $this->run("n -q cache:clean");
         $this->run("n -q cache:flush");
+
+        // Testing this purge for varnish
+        $this->run("curl -k -X PURGE localhost", [], false, false);
+
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
         
         foreach ($dirs as $dir) {
             $this->echo($dir);

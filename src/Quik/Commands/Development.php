@@ -122,7 +122,7 @@ class Development extends \Quik\CommandAbstract
         }
         
         $this->show_status(45,100, 'Importing Configuration');
-        $response = $this->_shell->execute($this->getBinMagento().' app:config:import');
+        $response = $this->_shell->execute($this->getBinMagento().' app:config:import --no-interaction');
         
         if ($this->getParameters()->getFull()) {
             $this->show_status(50,100, "Disabling Merged Assets");

@@ -289,6 +289,17 @@ class CommandAbstract
         '113'=> 'q',
         '115'=> 's',
         '10' => 'ENTER',
+        '48' => '0',
+        '49' => '1',
+        '50' => '2',
+        '51' => '3',
+        '52' => '4',
+        '53' => '5',
+        '54' => '6',
+        '55' => '7',
+        '56' => '8',
+        '57' => '9'
+        
     ];
     
     /**
@@ -316,7 +327,7 @@ class CommandAbstract
                 } elseif (isset($this->_keyMap[$c])) {
                     return $this->_keyMap[$c];
                 }
-//                 echo "Char read: $c\n";
+                 echo "Char read: $c\n";
             }
         }
     }
@@ -330,9 +341,11 @@ class CommandAbstract
         if (is_null($this->_user)) {
             $args = $this->getArgs();
             if (isset($args[0])) {
-                list($user, $group) = explode(':',$args[0]);
-                if (strlen($user)) {
-                    return $this->_user = $user;
+                if (strpos($args[0],':')!==false) {
+                    list($user, $group) = explode(':',$args[0]);
+                    if (strlen($user)) {
+                        return $this->_user = $user;
+                    }
                 }
             }
             
@@ -351,9 +364,11 @@ class CommandAbstract
         if (is_null($this->_group)) {
             $args = $this->getArgs();
             if (isset($args[0])) {
-                list($user, $group) = explode(':',$args[0]);
-                if (strlen($group)) {
-                    return $this->_group =$group;
+                if (strpos($args[0],':')!==false) {
+                    list($user, $group) = explode(':',$args[0]);
+                    if (strlen($group)) {
+                        return $this->_group =$group;
+                    }
                 }
             }
             
@@ -381,6 +396,13 @@ class CommandAbstract
         echo '------------------------------------------------'.PHP_EOL;
     }
     
+    protected $_cli_spinners = [
+        '|','/','-','\\'
+    ];
+    
+    protected $_cli_spinner = 0;
+    protected $_cli_lastmsg = null;
+    
     /**
      *
      * @param integer $done
@@ -399,7 +421,7 @@ class CommandAbstract
         }
         $now = time();
         
-        $perc=(double)($done/$total);
+        @$perc=(double)($done/$total);
         
         $bar=floor($perc*$size);
         
@@ -416,14 +438,22 @@ class CommandAbstract
         
         $status_bar.=\Quik\CommandAbstract::NC."] $disp%";
         
-        $rate = ($now-$start_time)/$done;
+        @$rate = ($now-$start_time)/$done;
         $left = $total - $done;
         $eta = round($rate * $left, 2);
         
         $elapsed = $now - $start_time;
         
+        $cli_spinner = '';
+        if ($this->_cli_lastmsg == $msg) {
+            if (!isset($this->_cli_spinners[$this->_cli_spinner])) {
+                $this->_cli_spinner = 0;
+            }
+            $cli_spinner = $this->_cli_spinners[$this->_cli_spinner].' ';
+            $this->_cli_spinner++;
+        }
         
-        $status_bar.= " ".number_format($elapsed)."s $msg";
+        $status_bar.= " ".number_format($elapsed)."s {$cli_spinner}$msg";
         
         $this->_shell->clearTerminalLine();
         $this->echo($status_bar, SELF::NC, false, true);
@@ -434,6 +464,8 @@ class CommandAbstract
         if($done == $total) {
             echo "\n";
         }
+        
+        $this->_cli_lastmsg = $msg;
     }
     
     /**

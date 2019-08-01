@@ -57,6 +57,14 @@ class Parameters
     protected $_commands = [];
     protected $_args = [];
     
+    protected $_mysql_user = false;
+    protected $_mysql_database = false;
+    protected $_mysql_password = false;
+    protected $_mysql_host = false;
+    protected $_mysql_port = false;
+    protected $_mysql_proxy = false;
+    protected $_mysql_rate_limit = true;
+    
     /**
      *
      */
@@ -93,6 +101,33 @@ class Parameters
                     $this->_quiet = true;
                 } elseif ($arg == '-v' || $arg == '--verbose') {
                     $this->_verbose = true;
+                    
+                } elseif ($arg == '--no-rate-limit') {
+                    $this->_mysql_rate_limit = false;
+                    
+                } elseif (strpos($arg, '--proxy')!==false) {
+                    list($param, $value) = explode('=',$arg);
+                    $this->_mysql_proxy = $value;
+                    
+                } elseif (strpos($arg, '--user')!==false) {
+                    list($param, $value) = explode('=',$arg);
+                    $this->_mysql_user = $value;
+                    
+                } elseif (strpos($arg, '--password')!==false) {
+                    list($param, $value) = explode('=',$arg);
+                    $this->_mysql_password = $value;
+                    
+                } elseif (strpos($arg, '--database')!==false) {
+                    list($param, $value) = explode('=',$arg);
+                    $this->_mysql_database = $value;
+                    
+                } elseif (strpos($arg, '--host')!==false) {
+                    list($param, $value) = explode('=',$arg);
+                    $this->_mysql_host = $value;
+                    
+                } elseif (strpos($arg, '--port')!==false) {
+                    list($param, $value) = explode('=',$arg);
+                    $this->_mysql_port = $value;
                     
                 } elseif ($arg == '--full') {
                     $this->__dev_full = true;
@@ -287,6 +322,65 @@ class Parameters
     public function getYes()
     {
         return $this->_yes;
+    }
+    
+    public function getMysqlRateLimit()
+    {
+        return $this->_mysql_rate_limit;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getMysqlProxy()
+    {
+        return $this->_mysql_proxy;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getMysqlUser()
+    {
+        return $this->_mysql_user;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getMysqlDatabase()
+    {
+        return $this->_mysql_database;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getMysqlPassword()
+    {
+        return $this->_mysql_password;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getMysqlHost()
+    {
+        return $this->_mysql_host;
+    }
+    
+    /**
+     *
+     * @return boolean
+     */
+    public function getMysqlPort()
+    {
+        return $this->_mysql_port;
     }
     
     /**

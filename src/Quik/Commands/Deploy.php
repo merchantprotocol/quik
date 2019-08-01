@@ -293,10 +293,7 @@ class Deploy extends \Quik\CommandAbstract
         
         $this->show_status(85,100, 'Git submodule update');
         $this->_shell->execute("cd $sistDir && git submodule update --init --recursive");
-        
-        //$this->show_status(95,100, 'Composer dump-autoload');
-        //$this->_shell->execute("composer dump-autoload -d $sistDir --no-dev --optimize");
-        
+
         $this->show_status(100,100, 'Deploy Complete');
         
         $this->run("media --dir=$sistDir -y");
