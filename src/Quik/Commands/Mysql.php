@@ -353,6 +353,7 @@ class Mysql extends \Quik\CommandAbstract
         }
         
         // Get All Views
+        $this->show_status(1,100,'Gathering Views');
         $query = "select TABLE_NAME from information_schema.views where table_schema = '{$this->_getDbname()}'";
         $viewResult = $this->_query($query);
         
@@ -366,6 +367,7 @@ class Mysql extends \Quik\CommandAbstract
         }
         
         // Get All Tables
+        $this->show_status(1,100,'Gathering Tables');
         $query = "SELECT TABLE_NAME,round(((data_length + index_length) / 1024 / 1024),2) 'Size'
             FROM information_schema.TABLES WHERE table_schema = '{$this->_getDbname()}'";
         $show = $this->_query($query);
@@ -387,6 +389,14 @@ class Mysql extends \Quik\CommandAbstract
             $total += $tables[$key]['size'];
         }
         
+        // dump all events, triggers and routines
+        $this->show_status(1,100,'Exporting Events, Triggers, and Routines');
+        $filename = '3_database_events.sql';
+        $this->_shell->execute("rm -f %s", [$path.$filename], false, false);
+        $this->_filePut("SET FOREIGN_KEY_CHECKS=0;SET autocommit = 0;", $path.$filename);
+        $this->_mysqlDump($connectParams, $this->_getDbname(), 'events', $path.$filename);
+        $this->_filePut("SET FOREIGN_KEY_CHECKS=1;COMMIT;SET autocommit = 1;", $path.$filename);
+        
         // dump all tables
         foreach ($tables as $key => $data) {
             $this->show_status($key,count($tables),'Exporting Table '.$tables[$key]['name']);
@@ -394,7 +404,8 @@ class Mysql extends \Quik\CommandAbstract
             $filename = '1_'.$table.'.sql';
             if (!in_array($filename, $completedTables)) {
                 $this->_filePut("SET FOREIGN_KEY_CHECKS=0;SET autocommit = 0;", $path.$filename);
-                $this->_mysqlDump($connectParams, $this->_getDbname(), 'sales', $path.$filename, ['tables' => $table]);
+                $this->_mysqlDump($connectParams, $this->_getDbname(), 'table', $path.$filename, ['tables' => $table]);
+                //$this->_filePut("Lost connection", $path.$filename);
                 $this->_filePut("SET FOREIGN_KEY_CHECKS=1;COMMIT;SET autocommit = 1;", $path.$filename);
             }
         }
@@ -405,19 +416,18 @@ class Mysql extends \Quik\CommandAbstract
             $filename = '2_'.$table.'.sql';
             if (!in_array($filename, $completedTables)) {
                 $this->_filePut("SET FOREIGN_KEY_CHECKS=0;SET autocommit = 0;", $path.$filename);
-                $this->_mysqlDump($connectParams, $this->_getDbname(), 'sales', $path.$filename, ['tables' => $table]);
+                $this->_mysqlDump($connectParams, $this->_getDbname(), 'table', $path.$filename, ['tables' => $table]);
                 $this->_filePut("SET FOREIGN_KEY_CHECKS=1;COMMIT;SET autocommit = 1;", $path.$filename);
             }
         }
         $this->show_status(100,100, 'Done with export'.PHP_EOL);
         
         
-        $this->show_status(0,100, 'Starting Export Validation');
+        // Checking for corrupt files
+        $this->echo("Checking for corrupt export files");
+        $corrupt = [];
         $test = $this->_shell->execute('ls %s', [$path], false, false);
-        
         $testFor = ['Lost connection', 'Warning]', 'mysqldump'];
-        $rerun = false;
-        
         $files = explode(PHP_EOL, $test->output);
         foreach($files as $file) {
             if (strpos($file, '.sql')===false) {
@@ -427,21 +437,41 @@ class Mysql extends \Quik\CommandAbstract
                 continue;
             }
             foreach ($testFor as $key => $grep) {
-                $test = $this->_shell->execute("cat %s | grep '%s'", [$path.$file, $grep], false, false);
+                $test = $this->_shell->execute("cat %s | grep %s", [$path.$file, $grep], false, false);
                 if (strpos($test->output, $grep)===false) {
                     continue;
                 }
-                $rerun = true;
-                $this->show_status($key,count($files), "Deleting corrupt file $file");
+                $this->echo("Deleting corrupt file $file");
                 $this->_shell->execute("rm -f %s", [$path.$file], false, false);
+                $file = substr($file,2,strlen($file));
+                $corrupt[] = substr($file,0,-4);
             }
         }
         
         $msg = 'Export is stable!';
-        if ($rerun) {
-            $msg = 'Export needs to be rerun, '.count($files).' files were corrupt.';
+        if (!empty($corrupt)) {
+            $msg = 'Export needs to be rerun, '.count($corrupt).' files were corrupt.';
         }
-        $this->show_status(100,100, $msg);
+        $this->show_status(0,100,$msg);
+        
+        // Rerun corrupt files with chunking
+        foreach($corrupt as $key => $table) {
+            // Schema only
+            $this->show_status($key,count($corrupt),"Schema for $table");
+            $filename = '1_'.$table.'.sql';
+            $this->_filePut("SET FOREIGN_KEY_CHECKS=0;SET autocommit = 0;", $path.$filename);
+            $this->_mysqlDump($connectParams, $this->_getDbname(), 'schema', $path.$filename, ['tables' => $table]);
+            
+            // get the total rows that we need to export
+            $total = $this->_query("select count(*) as count from $table");
+            $total = explode(PHP_EOL,$total);
+            $total = $total[1];
+            $limit = 50000;
+            for ($i = 0; $i <= $total; $i += $limit) {
+                $this->_mysqlDump($connectParams, $this->_getDbname(), 'data', $path.$filename, ['tables' => $table, 'offset' => $i, 'limit' => $limit]);
+            }
+            $this->_filePut("SET FOREIGN_KEY_CHECKS=1;COMMIT;SET autocommit = 1;", $path.$filename);
+        }
     }
     
     protected function _hasCompleted()
@@ -522,7 +552,7 @@ class Mysql extends \Quik\CommandAbstract
     }
     
     /**
-     * 
+     *  $breadth .= "--where=\"created_at > DATE_SUB(Now(), INTERVAL -{$options['limit']} DAY)\"";
      */
     protected function _mysqlDump( $connectParams, $dbname, $schema = 'all', $file = false, $options = [] )
     {
@@ -530,32 +560,39 @@ class Mysql extends \Quik\CommandAbstract
             $file = $this->_getBackupPath().'_full_backup.sql';
         }
         
+        // Specific to tables
         $breadth = '';
+        if (isset($options['tables'])) {
+            $breadth .= " {$options['tables']} ";
+        }
+        
+        // specific types of exports
         switch($schema) {
             case 'all':
-            $breadth = '';
+            $breadth .= ' --set-gtid-purged=OFF --single-transaction --routines --triggers --add-drop-trigger --events ';
             break;
-            case 'data':
-            $breadth = ' --single-transaction --no-create-info ';
-            break;
-            case 'sales':
-            $breadth = '';
-            $breadth .= " {$options['tables']} ";
-            $breadth .= ' --single-transaction ';
+            case 'events':
+            $breadth .= ' --set-gtid-purged=OFF --routines --triggers --add-drop-trigger --events --no-create-info --no-data --skip-opt ';
             break;
             case 'schema':
-            $breadth = ' --no-data ';
+            $breadth .= ' --skip-triggers --no-data ';
+            break;
+            case 'data':
+            $breadth .= ' --single-transaction --no-create-info --skip-triggers ';
+            break;
+            case 'table':
+            $breadth .= ' --single-transaction --skip-triggers ';
             break;
         }
         
-        if (in_array($schema, ['sales'])) {
-            if (isset($options['limit'])) {
-                $breadth .= "--where=\"created_at > DATE_SUB(Now(), INTERVAL -{$options['limit']} DAY)\"";
-            }
+        if (isset($options['limit']) && isset($options['offset'])) {
+            $breadth .= "--where='1 limit {$options['offset']}, {$options['limit']}'";
+        } elseif (isset($options['limit'])) {
+            $breadth .= "--where='1 limit {$options['limit']}'";
         }
         
         // --single-transaction 
-        $cmd = "MYSQL_PWD={$this->_getPassword()} mysqldump $connectParams $dbname $breadth --no-create-db --routines --triggers --add-drop-trigger --events --skip-comments ";
+        $cmd = "MYSQL_PWD={$this->_getPassword()} mysqldump $connectParams $dbname $breadth --no-create-db --skip-comments ";
         
         if ($this->_hasCstream() && $this->getParameters()->getMysqlRateLimit()) {
             $cmd .= " | cstream -t 1000000 ";
@@ -563,6 +600,8 @@ class Mysql extends \Quik\CommandAbstract
         
         //  Enhanced regex that removes DEFINER from views, triggers, procedures and functions
         $cmd .= " | sed -e 's/DEFINER[ ]*=[ ]*[^*]*\*/\*/' | sed -e 's/DEFINER[ ]*=[ ]*[^*]*PROCEDURE/PROCEDURE/' | sed -e 's/DEFINER[ ]*=[ ]*[^*]*FUNCTION/FUNCTION/'";
+        
+        //$this->echo(PHP_EOL.PHP_EOL.$cmd.PHP_EOL);
         
         return $this->_filePut($cmd, $file, true, true);
     }
