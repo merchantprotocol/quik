@@ -34,6 +34,13 @@ namespace Quik\Commands;
 
 use Quik\CommandAbstract;
 
+/**
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
 class Mysql extends \Quik\CommandAbstract
 {
     /**
@@ -82,6 +89,13 @@ class Mysql extends \Quik\CommandAbstract
         echo PHP_EOL;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     public function showConnection()
     {
         echo PHP_EOL;
@@ -95,6 +109,13 @@ class Mysql extends \Quik\CommandAbstract
         echo PHP_EOL;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $truncateAll = [
         'adminnotification_inbox',
         'admin_system_messages',
@@ -138,9 +159,59 @@ class Mysql extends \Quik\CommandAbstract
         'customer_visitor',
         'importexport_importdata',
         'import_history',
-        'sendfriend_log'
+        'sendfriend_log',
+        'cryozonic_stripesubscriptions_customers',
+        'customer_flowpassword',
+        'ebizmarts_autoresponder_backtostock',
+        'ebizmarts_abandonedcart_popup',
+        'ebizmarts_autoresponder_unsubscribe',
+        'ebizmarts_autoresponder_visited',
+        'magegiant_onestepcheckout_abandonedcart_customer',
+        'magemonkey_mails_sent',
+        'mailchimp_ecommerce_sync_data',
+        'mailchimp_errors',
+        'mailchimp_sync_batches',
+        'mailchimp_webhook_request',
+        'm_fpc_crawler_url',
+        'm_fpc_log',
+        'm_fpc_log_aggregated_daily',
+        'm_mstcore_logger',
+        'mp_debug_request_info',
+        'mp_multivariate_test_event',
+        'mp_multivariate_test_variant_session',
+        'mp_referral_transaction',
+        'mp_replication_test',
+        'mp_upsell_queue_email',
+        'mw_mcore_notification',
+        'newsletter_problem',
+        'newsletter_queue',
+        'newsletter_queue_link',
+        'newsletter_queue_store_link',
+        'op_avatax_log',
+        'op_avatax_queue',
+        'product_alert_stock',
+        'product_alert_price',
+        'recurring_errors',
+        'recurring_log',
+        'report_viewed_product_index',
+        'report_viewed_product_aggregated_daily',
+        'report_viewed_product_aggregated_monthly',
+        'report_viewed_product_aggregated_yearly',
+        'rf_unsubscribed_track',
+        'sales_bestsellers_aggregated_daily',
+        'sales_bestsellers_aggregated_monthly',
+        'sales_bestsellers_aggregated_yearly',
+        'sales_recurring_profile',
+        'smtppro_email_log',
     ];
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $trimExpired = [
         'admin_user_session',
         'session',
@@ -154,6 +225,13 @@ class Mysql extends \Quik\CommandAbstract
         'quote_shipping_rate',
     ];
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $dropFlat = [
         'customer_grid_flat',
         'design_config_grid_flat',
@@ -174,17 +252,53 @@ class Mysql extends \Quik\CommandAbstract
         'catalog_product_flat_7'
     ];
     
-    
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $sanitize = [
         'email' => [
             'customer_entity',
+            'customer_flat',
             'customer_grid_flat',
+            'sales_flat_order_address',
+            'sales_flat_quote_address',
+            'mp_recurring_order_addresses',
+            'mp_referral_refers',
+            'api_user',
+            'mp_migrate_cryozonic',
+            'mp_migrate_stripe_customer',
+            'mp_reviews_entity',
+            'mp_reviews_queue',
+            'paypalauth_customer',
+            
         ],
         'subscriber_email' => [
             'newsletter_subscriber'
+        ],
+        'customer_email' => [
+            'mp_recurring_orders',
+            'sales_flat_order',
+            'sales_flat_quote',
+            'cryozonic_stripesubscriptions_customers',
+            'mp_reports_sales'
+        ],
+        'recipient_email' => [
+            'core_email_queue_recipients',
+            ''
         ]
     ];
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $_salesTables = [
         'sales_order',
         'sales_order_grid',
@@ -200,6 +314,29 @@ class Mysql extends \Quik\CommandAbstract
         'sales_payment_transaction'
     ];
     
+    /**
+     * 
+     * Remove these lines form the sql files
+     * 
+     * 
+     * 
+     */
+    protected $removeLines = [
+        'SET @@SESSION.SQL_LOG_BIN= 0;',
+        'SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;',
+        'SET.*GLOBAL.GTID_PURGED.*',
+        'SET.*SESSION.*SQL_LOG_BIN.*MYSQLDUMP_TEMP_LOG_BIN.*'
+    ];
+    
+    protected $maildomain = '@mailinator.com';
+    
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     public function __construct( $app )
     {
         parent::__construct($app);
@@ -208,13 +345,62 @@ class Mysql extends \Quik\CommandAbstract
         }
     }
     
-    
-    
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     public function executeSanitize()
     {
+        $this->showConnection();
+        if (!$this->confirm("SANITIZE {$this->_getDbname()} on {$this->_getMysqlHost()}, continue?")) {
+            exit(0);
+        }
         
+        // Get All Tables
+        $this->show_status(1,100,'Gathering Tables');
+        $query = "SELECT TABLE_NAME
+            FROM information_schema.TABLES WHERE table_schema = '{$this->_getDbname()}'";
+        $show = $this->_query($query);
+        
+        $lines = explode(PHP_EOL,$show);
+        $existingTables = [];
+        foreach($lines as $line) {
+            if (strpos($line,'TABLE_NAME')!==false) continue;
+            $existingTables[] = $line;
+        }
+        
+        // SANITIZE the tables
+        foreach($this->sanitize as $column => $tables)
+        {
+            foreach($tables as $table)
+            {
+                if (!in_array($table, $existingTables)) continue;
+                $this->show_status(10,100,"Sanitize $column in $table");
+                $query = "UPDATE {$this->_getDbname()}.$table SET $column = CONCAT(LEFT(MD5($column),13),'{$this->maildomain}');";
+                $this->_query($query);
+            }
+        }
+        
+        // TRUNCATE these tables
+        foreach($this->truncateAll as $table)
+        {
+            if (!in_array($table, $existingTables)) continue;
+            $this->show_status(10,100,"Sanitize $column in $table");
+            //$query = "UPDATE {$this->_getDbname()}.$table SET $column = CONCAT(LEFT(MD5($column),13),'{$this->maildomain}');";
+            //$this->_query($query);
+        }
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     public function executeImport()
     {
         $response = $this->_shell->execute($this->getBinMagento().' deploy:mode:show', [], false, false);
@@ -222,10 +408,10 @@ class Mysql extends \Quik\CommandAbstract
         if ($mode == 'productio') {
             $this->echo("Cannot import when in production mode. Aborting...", SELF::YELLOW);
             exit(0);
-        } 
+        }
         
         $this->showConnection();
-        if (!$this->confirm('You\'re about to overwrite this database, continue?')) {
+        if (!$this->confirm("WIPE OUT {$this->_getDbname()} on {$this->_getMysqlHost()}, continue?")) {
             exit(0);
         }
         
@@ -244,13 +430,25 @@ class Mysql extends \Quik\CommandAbstract
         if (!$choice || !isset($this->_dumpPrompt[$choice])) {
             exit(0);
         }
+        echo PHP_EOL;
         $import = $this->_dumpPrompt[$choice];
         // Now we have a folder series to import
         
         // unzip all of the files
+        $this->show_status(1,100,'Checking import files');
         $files = $this->_shell->execute('ls %s', [$import], false, false);
         $files = explode("\n",$files->output);
         foreach($files as $file) {
+            if (strlen($file)<3) continue;
+            if (strpos($file,'sed')===0) continue;
+            $this->show_status(1,100,"Cleaning $file");
+            
+            // Clean the files before we import them
+            foreach ($this->removeLines as $illegal) {
+               $this->_shell->execute("sed -i -e '/$illegal/d' ".$import.DIRECTORY_SEPARATOR.$file);
+            }
+        
+            // If the file is not compressed, skip it
             if (strpos($file, '.gz')!==false && !$this->_hasGunzip()) {
                 $this->echo('You need to install GUNZIP to import these files');
                 exit;
@@ -264,6 +462,9 @@ class Mysql extends \Quik\CommandAbstract
             }
         }
         
+        $o = $this->_shell->render("rm -f ".$import.DIRECTORY_SEPARATOR."sed");
+        echo PHP_EOL.PHP_EOL.$o.PHP_EOL.PHP_EOL;
+        
         // Now we have .sql files we can import
         $files = $this->_shell->execute('ls %s', [$import], false, false);
         $files = explode("\n",$files->output);
@@ -272,6 +473,7 @@ class Mysql extends \Quik\CommandAbstract
         $first = 0;
         
         foreach($files as $file) {
+            if (strpos($file,'sed')===0) continue;
             $this->show_status($status*$first,100,"Importing $file");
             $this->_mysqlImport($import.DIRECTORY_SEPARATOR.$file);
             $first++;
@@ -309,7 +511,13 @@ class Mysql extends \Quik\CommandAbstract
         
     }
     
-    
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     public function executeTableSize()
     {
         $query = "SELECT 
@@ -324,7 +532,13 @@ class Mysql extends \Quik\CommandAbstract
         $this->echo($result);
     }
     
-    
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     public function executeDump()
     {
         if (!$this->_hasCstream()) {
@@ -342,14 +556,15 @@ class Mysql extends \Quik\CommandAbstract
     
         $connectParams = $this->_buildConnection();
         $path = $this->_getBackupPath();
+        
+        if (!file_exists($path)) {
+            $this->_shell->execute('mkdir -p %s', [$path]);
+        }
+        
         // Restarting last download
         $completedTables = $this->_hasCompleted();
         if (!empty($completedTables)) {
             $this->show_status(1,100,'Restarting Last Export');
-        }
-        
-        if (!file_exists($path)) {
-            $this->_shell->execute('mkdir -p %s', [$path]);
         }
         
         // Get All Views
@@ -392,10 +607,13 @@ class Mysql extends \Quik\CommandAbstract
         // dump all events, triggers and routines
         $this->show_status(1,100,'Exporting Events, Triggers, and Routines');
         $filename = '3_database_events.sql';
-        $this->_shell->execute("rm -f %s", [$path.$filename], false, false);
-        $this->_filePut("SET FOREIGN_KEY_CHECKS=0;SET autocommit = 0;", $path.$filename);
-        $this->_mysqlDump($connectParams, $this->_getDbname(), 'events', $path.$filename);
-        $this->_filePut("SET FOREIGN_KEY_CHECKS=1;COMMIT;SET autocommit = 1;", $path.$filename);
+        $output = $this->_shell->execute('tail -n1 %s', [$filename], false, false);
+        if (strpos($output->output, 'FOREIGN_KEY_CHECKS=1')===false) {
+            $this->_shell->execute("rm -f %s", [$path.$filename], false, false);
+            $this->_filePut("SET FOREIGN_KEY_CHECKS=0;SET autocommit = 0;", $path.$filename);
+            $this->_mysqlDump($connectParams, $this->_getDbname(), 'events', $path.$filename);
+            $this->_filePut("SET FOREIGN_KEY_CHECKS=1;COMMIT;SET autocommit = 1;", $path.$filename);
+        }
         
         // dump all tables
         foreach ($tables as $key => $data) {
@@ -422,12 +640,11 @@ class Mysql extends \Quik\CommandAbstract
         }
         $this->show_status(100,100, 'Done with export'.PHP_EOL);
         
-        
         // Checking for corrupt files
         $this->echo("Checking for corrupt export files");
         $corrupt = [];
         $test = $this->_shell->execute('ls %s', [$path], false, false);
-        $testFor = ['Lost connection', 'Warning]', 'mysqldump'];
+        $testFor = ['Lost connection', 'Warning]', 'mysqldump', 'ERROR 2002 (HY000)'];
         $files = explode(PHP_EOL, $test->output);
         foreach($files as $file) {
             if (strpos($file, '.sql')===false) {
@@ -447,6 +664,8 @@ class Mysql extends \Quik\CommandAbstract
                 $corrupt[] = substr($file,0,-4);
             }
         }
+        
+        
         
         $msg = 'Export is stable!';
         if (!empty($corrupt)) {
@@ -474,6 +693,13 @@ class Mysql extends \Quik\CommandAbstract
         }
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _hasCompleted()
     {
         $path = $this->_getBackupPath();
@@ -499,6 +725,13 @@ class Mysql extends \Quik\CommandAbstract
         return $tables;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _filePut( $contents, $file, $string = false, $clean = false )
     {
         if ($string) {
@@ -514,8 +747,11 @@ class Mysql extends \Quik\CommandAbstract
             $o = $this->_shell->execute("head -1 {$file}1");
             while (strpos($o->output,'/*')===false)
             {
-                $a = $this->_shell->execute("sed -i '1 d' {$file}1");
+                $this->_shell->execute("sed -i '1 d' {$file}1");
                 $o = $this->_shell->execute("head -1 {$file}1");
+            }
+            foreach ($this->removeLines as $illegal) {
+                $this->_shell->execute("sed -i -e '/$illegal/d' {$file}1");
             }
         }
         
@@ -540,6 +776,13 @@ class Mysql extends \Quik\CommandAbstract
         return $output->output;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _mysqlImport( $file )
     {
         $connectParams = $this->_buildConnection();
@@ -621,10 +864,31 @@ class Mysql extends \Quik\CommandAbstract
     }
     
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $_proxy = null;
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $_tunnel_port = '3307';
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _setupProxy()
     {
         $proxy = $this->getParameters()->getMysqlProxy();
@@ -648,6 +912,13 @@ class Mysql extends \Quik\CommandAbstract
         return true;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _MySQLConnect()
     {
         $connectParams = $this->_buildConnection();
@@ -671,6 +942,13 @@ class Mysql extends \Quik\CommandAbstract
         }
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     public function executeTunnelKill()
     {
         $pids = $this->_getTunnelPids();
@@ -684,6 +962,13 @@ class Mysql extends \Quik\CommandAbstract
         }
     }
 
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _getTunnelPids()
     {
         $output = $this->_shell->execute("ps -aux | grep {$this->_tunnel_port}", [], false, false);
@@ -703,14 +988,35 @@ class Mysql extends \Quik\CommandAbstract
         return $pids;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _hasTunnel()
     {
         $pids = $this->_getTunnelPids();
         return count($pids) >= 1;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $_host = null;
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _getMysqlHost()
     {
         if ($this->getParameters()->getMysqlHost()) {
@@ -721,6 +1027,13 @@ class Mysql extends \Quik\CommandAbstract
         return $parts[0];
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _getHost()
     {
         $_host = $this->_getMysqlHost();
@@ -730,9 +1043,22 @@ class Mysql extends \Quik\CommandAbstract
         return $_host;
     }
     
-    
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $_port = null;
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _getMysqlPort()
     {
         if ($this->getParameters()->getMysqlPort()) {
@@ -748,6 +1074,13 @@ class Mysql extends \Quik\CommandAbstract
         return $port;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _getPort()
     {
         $port = $this->_getMysqlPort();
@@ -757,6 +1090,13 @@ class Mysql extends \Quik\CommandAbstract
         return $port;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _getDbname()
     {
         if ($this->getParameters()->getMysqlDatabase()) {
@@ -766,6 +1106,13 @@ class Mysql extends \Quik\CommandAbstract
         return $env['db']['connection']['default']['dbname'];
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _getUsername()
     {
         if ($this->getParameters()->getMysqlUser()) {
@@ -775,6 +1122,13 @@ class Mysql extends \Quik\CommandAbstract
         return $env['db']['connection']['default']['username'];
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _getPassword()
     {
         if ($this->getParameters()->getMysqlPassword()) {
@@ -784,14 +1138,35 @@ class Mysql extends \Quik\CommandAbstract
         return $env['db']['connection']['default']['password'];
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $_colors = [
         1 => \Quik\CommandAbstract::GREEN,
         2 => \Quik\CommandAbstract::YELLOW,
         3 => \Quik\CommandAbstract::NC
     ];
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected $_dumpPrompt = [];
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _ls( $path, $depth = 0, &$count = 0 )
     {
         $depth++;
@@ -834,11 +1209,25 @@ class Mysql extends \Quik\CommandAbstract
         return require $this->_app->getWebrootDir().'app'.DIRECTORY_SEPARATOR.'etc'.DIRECTORY_SEPARATOR.'env.php';
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _getBackupPath()
     {
         return $this->_app->getWebrootDir().'var'.DIRECTORY_SEPARATOR.'backups'.DIRECTORY_SEPARATOR.'quik_sql'.DIRECTORY_SEPARATOR.$this->_createSlug($this->_getMysqlHost()).DIRECTORY_SEPARATOR.$this->_getDbname().DIRECTORY_SEPARATOR;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _createSlug($str, $delimiter = '-'){
 
         $slug = strtolower(trim(preg_replace('/[\s-]+/', $delimiter, preg_replace('/[^A-Za-z0-9-]+/', $delimiter, preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $str))))), $delimiter));
@@ -846,6 +1235,13 @@ class Mysql extends \Quik\CommandAbstract
 
     } 
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _hasCstream()
     {
         $output = $this->_shell->execute('cstream -v', [], false, false);
@@ -855,6 +1251,13 @@ class Mysql extends \Quik\CommandAbstract
         return true;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _hasGzip()
     {
         $output = $this->_shell->execute('gzip --version', [], false, false);
@@ -864,6 +1267,13 @@ class Mysql extends \Quik\CommandAbstract
         return true;
     }
     
+    /**
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     protected function _hasGunzip()
     {
         $output = $this->_shell->execute('gunzip --version', [], false, false);
