@@ -70,7 +70,7 @@ class Clear extends \Quik\CommandAbstract
         $this->run("n -q cache:flush");
 
         // Testing this purge for varnish
-        $this->run("curl -k -X PURGE localhost", [], false, false);
+        $this->_shell->execute("curl -k -X PURGE localhost", [], false, false);
 
         if (function_exists('opcache_reset')) {
             opcache_reset();
